@@ -1,0 +1,5 @@
+.DS_Store
+
+*.pyc
+credentials.txt
+task.txt
