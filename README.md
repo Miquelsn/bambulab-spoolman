@@ -1,2 +1,2 @@
 # bambulab-spoolman
-Pyhton rprogram to connect a bambulab printer with spoolman
+Pyhton program to connect a bambulab printer with spoolman
