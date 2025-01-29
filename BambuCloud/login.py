@@ -59,10 +59,15 @@ def LoginAndGetToken():
     PASSWORD = credentials.get('password')
 
     # Ensure that the credentials are loaded correctly
-    if not EMAIL or not PASSWORD:
-        print("Missing email or password in credentials file.")
-        exit()
-    
+    if not EMAIL:
+        # If the credentials are missing, prompt the user to enter them
+        EMAIL = input("Enter your email: ")
+        SaveNewToken("email", EMAIL)
+
+    if not PASSWORD:
+        PASSWORD = input("Enter your password: ")
+        SaveNewToken("password", PASSWORD)
+        
     """Logs in and retrieves the access token."""
     initial_payload = {
         "account": EMAIL,
@@ -76,10 +81,7 @@ def LoginAndGetToken():
             access_token = data.get("accessToken")
             if access_token:
                 print("Login successful!")
-                print(f"Access Token: {access_token}")
-                # Save the access token to the file
-                SaveNewToken("access_token", access_token)
-                return access_token
+                return 
             else:
                 if data.get("loginType") == "verifyCode":
                     # Step 1: Send verification code
@@ -118,6 +120,8 @@ def TestToken():
     # Load credentials from the file
     credentials = ReadCredentials()
     ACCES_TOKEN = credentials.get('access_token')
+    if not ACCES_TOKEN:
+        return False
     HEADERS['Authorization'] = f"Bearer {ACCES_TOKEN}"
 
     try:

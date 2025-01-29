@@ -58,39 +58,49 @@ class BambuPrinter:
 
   def SetWeightDetail(self, task_id):
     self.print_task.task_id = task_id
-    task_detail = BambuCloud.projects.GetTaksDetail(task_id)
+    job_id = BambuCloud.projects.GetJobID(task_id)
+    self.print_task.job_id = job_id
+    task_detail = BambuCloud.projects.GetTaksDetail(job_id)
     if task_detail is not None:
-      print(task_detail)
       self.print_task.total_weight = task_detail["weight"]
-      self.print_task.model_name = task_detail["title"]
+      self.print_task.model_name = task_detail["designTitle"]
+      filament = []
+      for ams in task_detail["amsDetailMapping"]:
+        print(ams["filamentId"])
+        print(ams["weight"])
+        filament.append({ "filamentId": ams["filamentId"], "weight": ams["weight"]})
+      self.print_task.teoric_filament = filament
 
   def SetPrintPercentatge(self, percentage):
     self.current_percent = percentage
 
   def SetCurrentState(self, id):
-    newState = None
+    print(f"Current state {id}")
+    self.new_state = None
     if id == 0:
-      newState = State.PRINTING
-    # elif id == 1 or id == 8 or id == 2:
-    #   newState = State.PREPARING
+      self.new_state = State.PRINTING
+    elif (id == 1 or id == 8 or id == 2) and self.current_state == State.IDLE:
+       self.new_state = State.PREPARING
     elif id == 255:
-      newState = State.IDLE
+      self.new_state = State.IDLE
     else:
       print(f"Undefined state id: {id}")
     self.ComprobateState()
     
     
   def SetGcodeState(self, gcode):
+    print(f"Gcode state {gcode}")
     if gcode == "FAILED":
       self.new_state = State.FAILED
     elif gcode == "PREPARE":
       self.new_state = State.PREPARING
-    elif gcode == "RUNNING" and self.current_state != State.PRINTING:
-      self.new_state = State.PREPARING
+    elif gcode == "FINISH":
+      self.new_state = State.IDLE
     self.ComprobateState()
       
       
   def ComprobateState(self):
+
     # Correct sync on first time event
     if self.first_time:
       self.first_time = False
@@ -131,6 +141,7 @@ class BambuPrinter:
         self.print_task.status = "Failed"
         self.print_task.end_time = time.time()
         self.print_task.SaveTask()
+        self.new_state = State.IDLE
         
       print(f"State change from {self.current_state.name} to {self.new_state.name}")
       self.current_state = self.new_state

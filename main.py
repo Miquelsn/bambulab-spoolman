@@ -12,7 +12,7 @@ import BambuPrinter as BambuPrinter
 
 # Get Bambu Cloud Credentails
 if BambuCloud.login.TestToken() == False:
-  BambuCloud.login_and_get_token()
+  BambuCloud.login.LoginAndGetToken()
   if BambuCloud.login.TestToken() == False:
     print("Failed to get token. Retrying in 5 minutes.")
     time.sleep(300)

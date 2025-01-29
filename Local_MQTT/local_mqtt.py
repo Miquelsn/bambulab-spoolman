@@ -1,5 +1,5 @@
-import os
 import re
+import time
 
 import paho.mqtt.client as mqtt
 import ssl
@@ -64,7 +64,6 @@ def CheckMQTTConnection():
 def OnConnect(client, userdata, flags, rc):
     credentials = ReadCredentials()
     TOPIC_REPORT = f"device/{credentials.get('dev_id')}/report"
-    
     # Subscribe to report topic
     client.subscribe(TOPIC_REPORT)
         
@@ -91,9 +90,10 @@ def SendStatusMessage(client):
 def StartMQTT():
     """Starts the local MQTT client and connects to the broker."""
     credentials = ReadCredentials()
-    dev_acces_code = credentials.get('dev_access_code')
+    dev_acces_code = credentials.get('dev_acces_code')
     printer_ip = credentials.get('printer_ip')
     client = mqtt.Client()
+    client.clean_session = True
     client.username_pw_set(USERNAME, dev_acces_code)
     client.tls_set(cert_reqs=ssl.CERT_NONE)  # Disable certificate verification
     client.tls_insecure_set(True)  # Allow insecure TLS connections
@@ -103,4 +103,5 @@ def StartMQTT():
     client.connect(printer_ip, PORT, 60)
     client.loop_start()
     print(f"Connected to MQTT broker at {printer_ip}")
+    time.sleep(5)
     SendStatusMessage(client)

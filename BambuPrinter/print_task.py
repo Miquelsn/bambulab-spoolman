@@ -5,11 +5,12 @@ class PrintTask:
   def __init__(self):
       self.model_name = None
       self.task_id = None
+      self.job_id = None
       self.ams_mapping = None
       self.total_weight = 0
       self.start_time = None
       self.end_time = None
-      self.filament_used = None
+      self.teoric_filament = None
       self.init_percent = 0
       self.percent_complete = 0
       self.status = None
@@ -19,11 +20,11 @@ class PrintTask:
       return {
           "model_name": self.model_name,
           "task_id": self.task_id,
-          "ams_mapping": self.ams_mapping,
+          "job_id": self.job_id,
           "total_weight": self.total_weight,
           "start_time": self.start_time,
           "end_time": self.end_time,
-          "filament_used": self.filament_used,
+          "teoric_filament": self.teoric_filament,
           "init_percent": self.init_percent,
           "percent_complete": self.percent_complete,
           "status": self.status,
@@ -33,11 +34,11 @@ class PrintTask:
       """Clean the task object."""
       self.model_name = None
       self.task_id = None
-      self.ams_mapping = None
+      self.job_id = None
       self.total_weight = 0
       self.start_time = None
       self.end_time = None
-      self.filament_used = None
+      self.teoric_filament = None
       self.init_percent = 0
       self.percent_complete = 0
       self.status = None
