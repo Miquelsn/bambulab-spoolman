@@ -11,6 +11,7 @@ class PrintTask:
       self.start_time = None
       self.end_time = None
       self.teoric_filament = None
+      self.reported_filament = None
       self.init_percent = 0
       self.percent_complete = 0
       self.status = None
@@ -25,6 +26,7 @@ class PrintTask:
           "start_time": self.start_time,
           "end_time": self.end_time,
           "teoric_filament": self.teoric_filament,
+          "reported_filament": self.reported_filament,
           "init_percent": self.init_percent,
           "percent_complete": self.percent_complete,
           "status": self.status,
@@ -39,6 +41,7 @@ class PrintTask:
       self.start_time = None
       self.end_time = None
       self.teoric_filament = None
+      self.reported_filament = None
       self.init_percent = 0
       self.percent_complete = 0
       self.status = None

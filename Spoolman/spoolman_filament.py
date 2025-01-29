@@ -13,8 +13,6 @@ class SpoolmanFilament:
     def __str__(self):
         return f"Filament Name: {self.filament_name}, Filament Type: {self.filament_type}, Filament Vendor: {self.filament_vendor_name}, Spool ID: {self.spoolId}, Filament ID: {self.filamentId}"
 
-
-
 def GetSpoolmanFilaments():
     # Load credentials from the file
     credentials = ReadCredentials()
@@ -35,28 +33,26 @@ def ProcessSpoolmanFilament(filaments):
     filaments_list = []
     unique_ids = set()  # To track unique filament IDs
     for filament in filaments:
-
         spoolman_filament = SpoolmanFilament()
-        
         spoolman_filament.spoolId = filament["id"]
         spoolman_filament.filamentId = filament["filament"]["id"]
         spoolman_filament.filament_name = filament["filament"]["name"]
         spoolman_filament.filament_vendor_name = filament["filament"]["vendor"]["name"]
-        
         spoolman_filament.filament_type = filament["filament"]["material"]
         # Ensure is unique by filamentID
         if spoolman_filament.spoolId not in unique_ids:
             filaments_list.append(spoolman_filament)
             unique_ids.add(spoolman_filament.spoolId)  # Add ID to the set
-        else:
-            print(f"Filament with ID {spoolman_filament.spoolId} already exists")
-            
-    for filament in filaments_list:
-        print(filament)
-    print("Final count: ", len(filaments_list))
+    return filaments_list
+
     
-filaments = GetSpoolmanFilaments()
-if filaments:
-    ProcessSpoolmanFilament(filaments)
-else:
-    print("Error no filaments")
+    
+def SaveFilamentsToFile(filaments):
+    filename = "spoolman_filaments.txt"
+    try:
+        with open(filename, "w", encoding="utf-8") as file:
+            for filament in filaments:
+                file.write(str(filament) + "\n")
+        print(f"Filaments saved successfully to {filename}")
+    except Exception as e:
+        print(f"An error occurred while saving filaments: {e}")

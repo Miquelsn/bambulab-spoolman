@@ -5,3 +5,7 @@ credentials.txt
 task.txt
 test.py
 test.py
+bambulab-spoolman.code-workspace
+spoolman_filaments.txt
+slicer_filaments.txt
+filament_mapping.json

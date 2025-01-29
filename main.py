@@ -2,12 +2,14 @@ import os
 import sys
 import time
 
+from Filament import filament
 import BambuCloud.login
+import BambuCloud.slicer_filament
 from BambuPrinter.bambu_printer import *
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-import BambuCloud as BambuCloud
+import Spoolman.spoolman_filament
+import Spoolman.login
+
 import Local_MQTT.local_mqtt as MQTT
-import Spoolman.login  as Spoolman
 import BambuPrinter as BambuPrinter
 
 # Get Bambu Cloud Credentails
@@ -23,8 +25,22 @@ if BambuCloud.login.TestToken() == False:
 MQTT.GetPrinterIP()
 
 # Get the IP of Spoolman
-Spoolman.ConfigureSpoolmanApi()
+Spoolman.login.ConfigureSpoolmanApi()
 
+
+# Save Filaments From Bambu Studio
+filaments = BambuCloud.slicer_filament.GetSlicerFilaments()
+filaments = BambuCloud.slicer_filament.ProcessSlicerFilament(filaments)
+if filaments:
+  BambuCloud.slicer_filament.SaveFilamentsToFile(filaments)
+
+# Save Filaments From Spoolman
+filaments = Spoolman.spoolman_filament.GetSpoolmanFilaments()
+filaments = Spoolman.spoolman_filament.ProcessSpoolmanFilament(filaments)
+if filaments:
+  Spoolman.spoolman_filament.SaveFilamentsToFile(filaments)
+
+filament.map_filaments()
 
 # Start and connect to the local MQTT broker
 MQTT.StartMQTT()
