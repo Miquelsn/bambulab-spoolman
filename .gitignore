@@ -9,3 +9,4 @@ bambulab-spoolman.code-workspace
 spoolman_filaments.txt
 slicer_filaments.txt
 filament_mapping.json
+log_errors.txt

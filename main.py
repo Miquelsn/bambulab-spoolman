@@ -2,6 +2,7 @@ import os
 import sys
 import time
 
+import helper_logs
 from Filament import filament
 import BambuCloud.login
 import BambuCloud.slicer_filament
@@ -12,14 +13,15 @@ import Spoolman.login
 import Local_MQTT.local_mqtt as MQTT
 import BambuPrinter as BambuPrinter
 
-# Get Bambu Cloud Credentails
-if BambuCloud.login.TestToken() == False:
-  BambuCloud.login.LoginAndGetToken()
-  if BambuCloud.login.TestToken() == False:
-    print("Failed to get token. Retrying in 5 minutes.")
-    time.sleep(300)
-    exit()
 
+
+# Get Bambu Cloud Credentials
+if not BambuCloud.login.TestToken():
+    BambuCloud.login.LoginAndGetToken()
+    if not BambuCloud.login.TestToken():
+        print("Failed to get token. Retrying in 5 minutes.")
+        time.sleep(300)
+        exit()
 
 # Get the IP of the printer
 MQTT.GetPrinterIP()
@@ -27,29 +29,32 @@ MQTT.GetPrinterIP()
 # Get the IP of Spoolman
 Spoolman.login.ConfigureSpoolmanApi()
 
-
 # Save Filaments From Bambu Studio
 filaments = BambuCloud.slicer_filament.GetSlicerFilaments()
 filaments = BambuCloud.slicer_filament.ProcessSlicerFilament(filaments)
 if filaments:
-  BambuCloud.slicer_filament.SaveFilamentsToFile(filaments)
+    BambuCloud.slicer_filament.SaveFilamentsToFile(filaments)
 
 # Save Filaments From Spoolman
 filaments = Spoolman.spoolman_filament.GetSpoolmanFilaments()
 filaments = Spoolman.spoolman_filament.ProcessSpoolmanFilament(filaments)
 if filaments:
-  Spoolman.spoolman_filament.SaveFilamentsToFile(filaments)
+    Spoolman.spoolman_filament.SaveFilamentsToFile(filaments)
 
+# Map filaments
 filament.map_filaments()
 
 # Start and connect to the local MQTT broker
 MQTT.StartMQTT()
 print("FSM Started. Type 'exit' to exit.")
-while 1:
-  time.sleep(1)
-  #Exit if user type exit
-  if input() == "exit":
-    exit()
-  pass
 
+while True:
+    try:
+        time.sleep(1)
+        # Exit if user types 'exit'
+        if input() == "exit":
+            break
+    except Exception as e:
+        helper_logs.log_error(e)
+        print("An error occurred in the loop. Check log_errors.txt for details.")
 

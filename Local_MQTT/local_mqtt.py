@@ -1,7 +1,8 @@
 import re
 import time
-
 import paho.mqtt.client as mqtt
+
+import helper_logs
 import ssl
 PORT = 8883  # MQTT over TLS
 USERNAME = "bblp"  # Fixed username for local MQTT
@@ -69,7 +70,11 @@ def OnConnect(client, userdata, flags, rc):
         
 # Callback for received messages
 def OnMessage(client, userdata, msg):
-    bp.bambu_printer.ProccessMQTTMsg(msg)
+    try:
+        bp.bambu_printer.ProccessMQTTMsg(msg)
+    except Exception as e:
+        helper_logs.log_error(e)
+        print("An error occurred in the loop. Check log_errors.txt for details.")
     
 def SendStatusMessage(client):
     """Sends a message to the local MQTT broker."""
