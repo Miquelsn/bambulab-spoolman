@@ -25,7 +25,7 @@ HEADERS = {
 
 
 def GetJobID(taskID):
-    if taskID == None or taskID == 0:
+    if taskID == None or taskID == "0":
         print("Error with taks ID")
         return
     # Load credentials from the file

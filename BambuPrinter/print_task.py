@@ -50,15 +50,25 @@ class PrintTask:
   def ReportAndSaveTask(self):
       """Save the task to a task.txt file as a JSON object."""
       file_name = "task.txt"
-      if(self.teoric_filaments):
-        self.reported_filament = []  # Inicializar si es None
-        for filament in self.teoric_filaments:
-            print(filament["filamentId"])
-            print(filament["weight"])
-            print("Posible Percentatge: ", (self.percent_complete-self.init_percent)/100)
-            saved_filament = spoolman_filament.RegisterFilament(filament["filamentId"], filament["weight"])
-            if saved_filament == True:
-                self.reported_filament.append(filament)
+      if self.percent_complete != 0:
+        if self.teoric_filaments:
+            self.reported_filament = []  # Inicializar si es None
+            if self.percent_complete == 100:
+                print("Complete Taks")
+                multiplier = 1
+            else:
+                print("No complete task")
+                try:
+                    multiplier = (self.percent_complete-self.init_percent)/(100-self.init_percent)
+                except:
+                    multiplier = 1
+                    print("Error calculating multiplier")
+                print("Using multiplier: ", multiplier)
+                
+            for filament in self.teoric_filaments:
+                saved_filament = spoolman_filament.RegisterFilament(filament["filamentId"], multiplier*filament["weight"])
+                if saved_filament == True:
+                    self.reported_filament.append(filament)
       
       # Load existing tasks if the file exists
       if os.path.exists(file_name):

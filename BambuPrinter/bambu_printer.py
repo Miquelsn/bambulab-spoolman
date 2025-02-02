@@ -60,8 +60,8 @@ class BambuPrinter:
 
   def SetWeightDetail(self, task_id):
     self.print_task.task_id = task_id
-    if task_id == 0:
-      print("Task ID is 0")
+    if task_id == "0":
+      print("Task ID is 0. This integration just works with cloud print tasks")
       return
     job_id = BambuCloud.projects.GetJobID(task_id)
     self.print_task.job_id = job_id
