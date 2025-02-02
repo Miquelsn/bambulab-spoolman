@@ -25,6 +25,9 @@ HEADERS = {
 
 
 def GetJobID(taskID):
+    if taskID == None or taskID == 0:
+        print("Error with taks ID")
+        return
     # Load credentials from the file
     credentials = ReadCredentials()
     ACCES_TOKEN = credentials.get('access_token')
@@ -38,15 +41,18 @@ def GetJobID(taskID):
             if "job_id" in json_data:
               return json_data['job_id']
             else:
-              print(f"Failed to get tasks with status code {response.status_code}: {response.text}")
+              print(f"Failed to get job id with status code {response.status_code}: {response.text}")
         else:
-            print(f"Failed to get tasks with status code {response.status_code}: {response.text}")  
+            print(f"Failed to get job id with status code {response.status_code}: {response.text}")  
     except Exception as e:
         print(f"An error occurred while getting the tasks: {e}")    
     return None
 
 
 def GetTaksDetail(jobID):
+    if jobID == None or jobID == 0:
+        print("Error with taks ID")
+        return
     # Load credentials from the file
     credentials = ReadCredentials()
     ACCES_TOKEN = credentials.get('access_token')

@@ -1,5 +1,6 @@
 import json
 import os
+import Spoolman.spoolman_filament as spoolman_filament
 
 class PrintTask:
   def __init__(self):
@@ -10,7 +11,7 @@ class PrintTask:
       self.total_weight = 0
       self.start_time = None
       self.end_time = None
-      self.teoric_filament = None
+      self.teoric_filaments = None
       self.reported_filament = None
       self.init_percent = 0
       self.percent_complete = 0
@@ -25,7 +26,7 @@ class PrintTask:
           "total_weight": self.total_weight,
           "start_time": self.start_time,
           "end_time": self.end_time,
-          "teoric_filament": self.teoric_filament,
+          "teoric_filaments": self.teoric_filaments,
           "reported_filament": self.reported_filament,
           "init_percent": self.init_percent,
           "percent_complete": self.percent_complete,
@@ -40,15 +41,24 @@ class PrintTask:
       self.total_weight = 0
       self.start_time = None
       self.end_time = None
-      self.teoric_filament = None
+      self.teoric_filaments = None
       self.reported_filament = None
       self.init_percent = 0
       self.percent_complete = 0
       self.status = None
       
-  def SaveTask(self):
+  def ReportAndSaveTask(self):
       """Save the task to a task.txt file as a JSON object."""
       file_name = "task.txt"
+      if(self.teoric_filaments):
+        self.reported_filament = []  # Inicializar si es None
+        for filament in self.teoric_filaments:
+            print(filament["filamentId"])
+            print(filament["weight"])
+            print("Posible Percentatge: ", (self.percent_complete-self.init_percent)/100)
+            saved_filament = spoolman_filament.RegisterFilament(filament["filamentId"], filament["weight"])
+            if saved_filament == True:
+                self.reported_filament.append(filament)
       
       # Load existing tasks if the file exists
       if os.path.exists(file_name):

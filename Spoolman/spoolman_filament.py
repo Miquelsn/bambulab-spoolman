@@ -1,17 +1,17 @@
 import requests
 import os
 from tools import *
+import json
 
 class SpoolmanFilament:
     def __init__(self):
         self.spoolId = None
-        self.filamentId = None
         self.filament_name = None
         self.filament_vendor_name = None
         self.filament_type = None
     
     def __str__(self):
-        return f"Filament Name: {self.filament_name}, Filament Type: {self.filament_type}, Filament Vendor: {self.filament_vendor_name}, Spool ID: {self.spoolId}, Filament ID: {self.filamentId}"
+        return f"Filament Name: {self.filament_name}, Filament Type: {self.filament_type}, Filament Vendor: {self.filament_vendor_name}, Filament ID: {self.spoolId}"
 
 def GetSpoolmanFilaments():
     # Load credentials from the file
@@ -34,11 +34,17 @@ def ProcessSpoolmanFilament(filaments):
     unique_ids = set()  # To track unique filament IDs
     for filament in filaments:
         spoolman_filament = SpoolmanFilament()
-        spoolman_filament.spoolId = filament["id"]
-        spoolman_filament.filamentId = filament["filament"]["id"]
-        spoolman_filament.filament_name = filament["filament"]["name"]
-        spoolman_filament.filament_vendor_name = filament["filament"]["vendor"]["name"]
-        spoolman_filament.filament_type = filament["filament"]["material"]
+        
+        # Ensure safe access to dictionary fields
+        spoolman_filament.spoolId = filament.get("id")
+        filament_data = filament.get("filament", {})  # Ensure it's a dict
+        spoolman_filament.filament_name = filament_data.get("name")
+        
+        vendor_data = filament_data.get("vendor", {})  # Ensure vendor is a dict
+        spoolman_filament.filament_vendor_name = vendor_data.get("name")
+
+        spoolman_filament.filament_type = filament_data.get("material")
+
         # Ensure is unique by filamentID
         if spoolman_filament.spoolId not in unique_ids:
             filaments_list.append(spoolman_filament)
@@ -56,3 +62,35 @@ def SaveFilamentsToFile(filaments):
         print(f"Filaments saved successfully to {filename}")
     except Exception as e:
         print(f"An error occurred while saving filaments: {e}")
+        
+def LoadFilamentMapping():
+    with open("filament_mapping.json", "r") as file:
+        return json.load(file)    
+      
+def GetSpoolmanID(filament_mapping, slicer_filamentID):
+    return filament_mapping.get(slicer_filamentID)     
+  
+def RegisterFilament(slicer_filamentID, weight):
+    filament_mapping = LoadFilamentMapping()
+    spoolman_filamentID = GetSpoolmanID(filament_mapping, slicer_filamentID)
+    
+    if spoolman_filamentID is None:
+        print(f"No corresponding spoolman filament for {slicer_filamentID}")
+        return False
+      
+    # Load credentials from the file
+    credentials = ReadCredentials()
+    spoolman_ip = credentials.get("spoolman_ip")
+    spoolman_port = credentials.get("spoolman_port")
+    url = f"http://{spoolman_ip}:{spoolman_port}/api/v1/spool/{spoolman_filamentID}/use"
+    payload = {"use_weight": weight}
+
+    try:
+        response = requests.put(url, json=payload)
+        if response.status_code == 200:
+            return True
+        else:
+            print(f"Failed to get spoolman filaments with status code {response.status_code}: {response.text}")  
+    except Exception as e:
+        print(f"An error occurred while getting the spoolman filaments: {e}")    
+    return False

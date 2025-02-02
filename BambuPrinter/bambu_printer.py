@@ -10,18 +10,20 @@ class State (Enum):
   PREPARING  = 1
   PRINTING = 2
   FAILED = 3
+  UNKWON = 4
 
 
 class BambuPrinter:
   
   def __init__(self):
-    self.current_state = State.IDLE
-    self.new_state = State.IDLE
+    self.current_state = State.UNKWON
+    self.new_state = State.UNKWON
     self.current_gcode = None 
     self.current_filament = None
     self.current_percent = 0
     self.print_task = PrintTask()
     self.first_time = True
+    self.complete_task = False
 
 
   def ProccessMQTTMsg(self, msg):
@@ -58,6 +60,9 @@ class BambuPrinter:
 
   def SetWeightDetail(self, task_id):
     self.print_task.task_id = task_id
+    if task_id == 0:
+      print("Task ID is 0")
+      return
     job_id = BambuCloud.projects.GetJobID(task_id)
     self.print_task.job_id = job_id
     task_detail = BambuCloud.projects.GetTaksDetail(job_id)
@@ -69,14 +74,13 @@ class BambuPrinter:
         print(ams["filamentId"])
         print(ams["weight"])
         filament.append({ "filamentId": ams["filamentId"], "weight": ams["weight"]})
-      self.print_task.teoric_filament = filament
+      self.print_task.teoric_filaments = filament
 
   def SetPrintPercentatge(self, percentage):
     self.current_percent = percentage
 
   def SetCurrentState(self, id):
     print(f"Current state {id}")
-    self.new_state = None
     if id == 0:
       self.new_state = State.PRINTING
     elif (id == 1 or id == 8 or id == 2) and self.current_state == State.IDLE:
@@ -104,43 +108,51 @@ class BambuPrinter:
     # Correct sync on first time event
     if self.first_time:
       self.first_time = False
+      self.complete_task = False
       self.current_state = self.new_state
       self.print_task.CleanTask()
       return
     
     if self.current_state != self.new_state:
       # Finished task printing. Print task is saved.
-      if(self.new_state == State.IDLE):
+      if self.new_state == State.IDLE:
         print("Printer is idle.")
         self.print_task.percent_complete = self.current_percent
         self.print_task.status = "Complete"
         self.print_task.end_time = time.time()
-        self.print_task.SaveTask()
+        print("Task complete", self.complete_task)
+        if self.complete_task == True:
+          self.print_task.ReportAndSaveTask()
+        self.complete_task = False
         
       # Print taks is received and start preparing
       elif(self.new_state == State.PREPARING):
         print("Printer is preparing.")
+        self.complete_task = True
         self.print_task.CleanTask()
         self.print_task.start_time = time.time()
         
       # Print taks is received and start printing without preparing
       elif(self.new_state == State.PRINTING and self.current_state != State.PREPARING):
         print("Printer is printing.")
+        self.complete_task = True
         self.print_task.CleanTask()
         self.print_task.start_time = time.time()
         self.print_task.init_percent = self.current_percent
 
       # Activate when really stating to print
-      elif(self.new_state == State.PRINTING):
+      elif self.new_state == State.PRINTING:
         self.print_task.init_percent = self.current_percent
         
       # Print task is cancelled or failed. Print task is saved.
-      elif(self.new_state == State.FAILED):
+      elif self.new_state == State.FAILED:
         print("Print failed.")
         self.print_task.percent_complete = self.current_percent
         self.print_task.status = "Failed"
         self.print_task.end_time = time.time()
-        self.print_task.SaveTask()
+        if self.complete_task == True:
+          self.print_task.ReportAndSaveTask()
+        self.complete_task = False
         self.new_state = State.IDLE
         
       print(f"State change from {self.current_state.name} to {self.new_state.name}")

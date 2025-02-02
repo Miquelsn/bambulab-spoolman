@@ -45,9 +45,9 @@ def GetSlicerFilaments():
             private_filament = private_filament["filament"]["private"]
             return private_filament
         else:
-            print(f"Failed to get tasks with status code {response.status_code}: {response.text}")  
+            print(f"Failed to get slicer filament with status code {response.status_code}: {response.text}")  
     except Exception as e:
-        print(f"An error occurred while getting the tasks: {e}")    
+        print(f"An error occurred while getting the slicer filament: {e}")    
     return None
 
 def ProcessSlicerFilament(filaments):
