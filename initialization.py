@@ -14,6 +14,7 @@ import Local_MQTT.local_mqtt as MQTT
 import BambuPrinter as BambuPrinter
 
 
+
 # Get Bambu Cloud Credentials
 if not BambuCloud.login.TestToken():
     BambuCloud.login.LoginAndGetToken()
@@ -43,17 +44,5 @@ if filaments:
 # Map filaments
 filament.map_filaments()
 
-# Start and connect to the local MQTT broker
-MQTT.StartMQTT()
-print("FSM Started. Type 'exit' to exit.")
-
-while True:
-    try:
-        time.sleep(1)
-        # Exit if user types 'exit'
-        if input() == "exit":
-            break
-    except Exception as e:
-        helper_logs.log_error(e)
-        print("An error occurred in the loop. Check log_errors.txt for details.")
-
+print("Initialization Complete Correctly")
+print("Run main.py")
