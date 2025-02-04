@@ -5,13 +5,6 @@ This Python program integrates with Bambu Cloud, the Bambu printer MQTT server, 
 
 This is currently in the alpha stage. It is functional, but there is still much work to be done to improve ease of use and usability.
 
-## Limitations
-- Tested only with a Bambu A1 with AMS Lite. Other printers may work, but this is not guaranteed.
-- Designed to work with a single printer.
-- Requires access to Bambu Cloud to retrieve model weight and filament usage.
-- Filaments must be mapped in the slicer.
-- Only works for prints sent from the slicer to the printer. Prints from local SD storage or local connectivity will not provide weight data, as this information is not transmitted locally via MQTT.
-
 ## Features
 - Retrieves print task details from Bambu Cloud.
 - Obtains model weight per filament and filament names from the slicer (Orca Slicer or Bambu Studio).
@@ -19,12 +12,19 @@ This is currently in the alpha stage. It is functional, but there is still much 
 - Integrates with Spoolman to fetch filament data and generate usage reports.
 - Saves a history of prints.
 - Supports multicolor AMS Lite.
-- Tracks print progress to report filament usage. If a print is incomplete, it reports the percentage of filament used. (Note: For multicolor prints, accuracy may be affected due to potential layer imbalances and specific color usage variations.)
+- Tracks print progress to report filament usage. If a print is incomplete, it reports the percentage of print as the multiplier of the filament used. (Note: For multicolor prints, accuracy may be affected due to potential layer imbalances and specific color usage variations.)
+
+## Limitations
+- Tested only with a Bambu A1 with AMS Lite. Other printers should work, but this is not guaranteed.
+- Designed to work with a single printer.
+- Requires access to Bambu Cloud to retrieve model weight and filament usage.
+- Filaments must be mapped in the slicer.
+- Only works for prints sent from the slicer to the printer. Prints from local SD storage or local connectivity will not provide weight data, as this information is not transmitted locally via MQTT.
 
 ## Installation & Usage
 ### Requirements
 - Python must be installed.
-- Required Python libraries: `paho-mqtt`, `json`, `requests`, `difflib`, and `ref`.
+- Required Python libraries: `paho-mqtt`, `json`, `requests`, `difflib`, `ref` and `configparser`.
 
 ### Setup
 1. Run `initialization.py` and follow the terminal instructions:
