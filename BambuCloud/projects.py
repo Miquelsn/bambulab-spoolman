@@ -30,7 +30,7 @@ def GetJobID(taskID):
         return
     # Load credentials from the file
     credentials = ReadCredentials()
-    ACCES_TOKEN = credentials.get('access_token')
+    ACCES_TOKEN = credentials.get('DEFAULT','access_token', fallback= None)
     HEADERS['Authorization'] = f"Bearer {ACCES_TOKEN}"
     try:
         # Concatenate the base URL with the task ID
@@ -55,7 +55,7 @@ def GetTaksDetail(jobID):
         return
     # Load credentials from the file
     credentials = ReadCredentials()
-    ACCES_TOKEN = credentials.get('access_token')
+    ACCES_TOKEN = credentials.get('DEFAULT','access_token', fallback= None)
     HEADERS['Authorization'] = f"Bearer {ACCES_TOKEN}"
     
     try:

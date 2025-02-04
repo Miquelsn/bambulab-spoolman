@@ -21,8 +21,8 @@ def TestSpoolmanApi(ip, port):
 def ConfigureSpoolmanApi():
     # See if the data is in the credentials file
     credentials = ReadCredentials()
-    spoolman_ip = credentials.get('spoolman_ip')
-    spoolman_port = credentials.get('spoolman_port')
+    spoolman_ip = credentials.get('DEFAULT','spoolman_ip', fallback= None)
+    spoolman_port = credentials.get('DEFAULT','spoolman_port', fallback= None)
     if spoolman_ip and spoolman_port:
         if TestSpoolmanApi(spoolman_ip, spoolman_port):
             print("Spoolman configuration working")

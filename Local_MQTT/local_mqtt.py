@@ -22,7 +22,7 @@ def IsValidIp(ip):
 def GetPrinterIP():
     """Checks for printer_ip in credentials or prompts the user to provide one."""
     credentials = ReadCredentials()
-    printer_ip = credentials.get('printer_ip')
+    printer_ip = credentials.get('DEFAULT','printer_ip', fallback = None)
     
     if printer_ip and IsValidIp(printer_ip):
         print(f"printer_ip found in credentials: {printer_ip}")
@@ -47,8 +47,8 @@ def GetPrinterIP():
 def CheckMQTTConnection():
     """Checks if the MQTT broker is reachable at the given IP."""
     credentials = ReadCredentials()
-    password = credentials.get('password')
-    printer_ip = credentials.get('printer_ip')
+    password = credentials.get('DEFAULT','password', fallback = None)
+    printer_ip = credentials.get('DEFAULT','printer_ip', fallback = None)
     client = mqtt.Client()
     client.username_pw_set(USERNAME, password)
     client.tls_set(cert_reqs=ssl.CERT_NONE)  # Disable certificate verification
@@ -64,7 +64,7 @@ def CheckMQTTConnection():
 # Callback when connecting to MQTT Broker
 def OnConnect(client, userdata, flags, rc):
     credentials = ReadCredentials()
-    TOPIC_REPORT = f"device/{credentials.get('dev_id')}/report"
+    TOPIC_REPORT = f"device/{credentials.get('DEFAULT','dev_id', fallback= None)}/report"
     # Subscribe to report topic
     client.subscribe(TOPIC_REPORT)
         
@@ -79,7 +79,7 @@ def OnMessage(client, userdata, msg):
 def SendStatusMessage(client):
     """Sends a message to the local MQTT broker."""
     credentials = ReadCredentials()
-    dev_id = credentials.get('dev_id')
+    dev_id = credentials.get('DEFAULT','dev_id', fallback= None)
     topic = f"device/{dev_id}/request"
     message ={
     "pushing": {
@@ -95,8 +95,8 @@ def SendStatusMessage(client):
 def StartMQTT():
     """Starts the local MQTT client and connects to the broker."""
     credentials = ReadCredentials()
-    dev_acces_code = credentials.get('dev_acces_code')
-    printer_ip = credentials.get('printer_ip')
+    dev_acces_code = credentials.get('DEFAULT','dev_acces_code', fallback= None)
+    printer_ip = credentials.get('DEFAULT','printer_ip', fallback= None)
     client = mqtt.Client()
     client.clean_session = True
     client.username_pw_set(USERNAME, dev_acces_code)

@@ -27,8 +27,8 @@ HEADERS = {
 def SendVerificationCode():
     # Load credentials from the file
     credentials = ReadCredentials()
-    EMAIL = credentials.get('email')
-    PASSWORD = credentials.get('password')
+    EMAIL = credentials.get('DEFAULT','email', fallback= None)
+    PASSWORD = credentials.get('DEFAULT','password', fallback= None)
 
     # Ensure that the credentials are loaded correctly
     if not EMAIL or not PASSWORD:
@@ -55,8 +55,8 @@ def SendVerificationCode():
 def LoginAndGetToken():
     # Load credentials from the file
     credentials = ReadCredentials()
-    EMAIL = credentials.get('email')
-    PASSWORD = credentials.get('password')
+    EMAIL = credentials.get('DEFAULT','email', fallback= None)
+    PASSWORD = credentials.get('DEFAULT','password', fallback= None)
 
     # Ensure that the credentials are loaded correctly
     if not EMAIL:
@@ -119,7 +119,7 @@ def LoginAndGetToken():
 def TestToken():
     # Load credentials from the file
     credentials = ReadCredentials()
-    ACCES_TOKEN = credentials.get('access_token')
+    ACCES_TOKEN = credentials.get('DEFAULT','access_token', fallback= None)
     if not ACCES_TOKEN:
         return False
     HEADERS['Authorization'] = f"Bearer {ACCES_TOKEN}"

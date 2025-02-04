@@ -16,8 +16,8 @@ class SpoolmanFilament:
 def GetSpoolmanFilaments():
     # Load credentials from the file
     credentials = ReadCredentials()
-    spoolman_ip = credentials.get("spoolman_ip")
-    spoolman_port = credentials.get("spoolman_port")
+    spoolman_ip = credentials.get('DEFAULT',"spoolman_ip", fallback = None)
+    spoolman_port = credentials.get('DEFAULT',"spoolman_port", fallback = None)
     url = f"http://{spoolman_ip}:{spoolman_port}/api/v1/spool"
     try:
         response = requests.get(url)
@@ -80,8 +80,8 @@ def RegisterFilament(slicer_filamentID, weight):
       
     # Load credentials from the file
     credentials = ReadCredentials()
-    spoolman_ip = credentials.get("spoolman_ip")
-    spoolman_port = credentials.get("spoolman_port")
+    spoolman_ip = credentials.get('DEFAULT',"spoolman_ip", fallback = None)
+    spoolman_port = credentials.get('DEFAULT',"spoolman_port", fallback = None)
     url = f"http://{spoolman_ip}:{spoolman_port}/api/v1/spool/{spoolman_filamentID}/use"
     payload = {"use_weight": weight}
 

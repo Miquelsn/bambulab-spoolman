@@ -36,7 +36,7 @@ class SlicerFilament:
 def GetSlicerFilaments():
     # Load credentials from the file
     credentials = ReadCredentials()
-    ACCES_TOKEN = credentials.get('access_token')
+    ACCES_TOKEN = credentials.get('DEFAULT','access_token', fallback= None)
     HEADERS['Authorization'] = f"Bearer {ACCES_TOKEN}"
     try:
         response = requests.get(URL, headers=HEADERS)
