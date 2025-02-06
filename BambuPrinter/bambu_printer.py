@@ -68,7 +68,8 @@ class BambuPrinter:
     task_detail = BambuCloud.projects.GetTaksDetail(job_id)
     if task_detail is not None:
       self.print_task.total_weight = task_detail["weight"]
-      self.print_task.model_name = task_detail["designTitle"]
+      self.print_task.model_name = task_detail["title"]
+      self.print_task.image_cover_url = task_detail["cover"]
       filament = []
       for ams in task_detail["amsDetailMapping"]:
         print(ams["filamentId"])

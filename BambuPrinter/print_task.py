@@ -16,6 +16,7 @@ class PrintTask:
       self.init_percent = 0
       self.percent_complete = 0
       self.status = None
+      self.image_cover_url = None
 
   def to_dict(self):
       """Convert the PrintTask object to a dictionary."""
@@ -31,6 +32,7 @@ class PrintTask:
           "init_percent": self.init_percent,
           "percent_complete": self.percent_complete,
           "status": self.status,
+          "image_cover_url": self.image_cover_url
       }
       
   def CleanTask(self):
@@ -46,6 +48,7 @@ class PrintTask:
       self.init_percent = 0
       self.percent_complete = 0
       self.status = None
+      self.image_cover_url = None
       
   def ReportAndSaveTask(self):
       """Save the task to a task.txt file as a JSON object."""
