@@ -15,7 +15,7 @@ def parse_filaments(filename):
             match = re.search(r"Filament Name: (.*?), Filament Type: (.*?), Filament Vendor: (.*?), .*?Filament ID: (\w+)", line)
             if match:
                 name, ftype, vendor, filament_id = match.groups()
-                key = f"{vendor} {ftype} {name}".strip()
+                key = f"{vendor} {ftype} {name} {filament_id}".strip()
                 filaments[key] = {
                     "id": filament_id.strip(),
                     "vendor": vendor.strip(),
