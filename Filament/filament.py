@@ -88,14 +88,26 @@ def map_filaments():
         
         if user_input.lower() == "pass":
             skipped_filaments.append((bambu_name, bambu_data))
-        else:
-            selected_spool_id = spoolman_filaments.get(user_input, {}).get("id") if user_input else spoolman_filaments[suggested_match]["id"]
+            continue
             
-            if selected_spool_id and selected_spool_id not in used_spool_ids:
-                filament_mapping[bambu_data["id"]] = selected_spool_id
-                used_spool_ids.add(selected_spool_id)
-                used_bambu_ids.add(bambu_data["id"])
-                print(f"Mapped {bambu_name} -> Spool ID: {selected_spool_id}")
+        if user_input:
+            spool_id_lookup = {str(spool["id"]): spool["id"] for spool in spoolman_filaments.values()}
+            selected_spool_id = spool_id_lookup.get(user_input)
+        else:
+            selected_spool_id = spoolman_filaments.get(suggested_match, {}).get("id")
+
+        if selected_spool_id and (selected_spool_id not in used_spool_ids):
+            filament_mapping[bambu_data["id"]] = selected_spool_id
+            used_spool_ids.add(selected_spool_id)
+            used_bambu_ids.add(bambu_data["id"])
+            print(f"Mapped {bambu_name} -> Spool ID: {selected_spool_id}")
+        else:
+            if not selected_spool_id:
+                print("\033[91mSpoolman Filament Not Found\033[0m")
+            else:
+                print("\033[91mSpoolman Filament Used in Another Bambulab filament\033[0m")
+            skipped_filaments.append((bambu_name, bambu_data))
+
     
     if skipped_filaments:
         print("\nRevisiting skipped filaments with fallback suggestions...")
@@ -114,6 +126,11 @@ def map_filaments():
                     used_bambu_ids.add(bambu_data["id"])
                     print(f"Mapped {bambu_name} -> Spool ID: {selected_spool_id}")
     
+    if len(skipped_filaments) != 0:
+        print("\033[91mError, skipped filaments are not empty\n Not all bambu filaments are mapped\033[0m")
+        print("List of filaments not saved: ", skipped_filaments)
+
+        
     save_mappings(filament_mapping)
     print("Filament mapping saved!")
 
