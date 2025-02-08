@@ -4,6 +4,8 @@ import BambuCloud.projects
 from enum import Enum
 from BambuPrinter.print_task import PrintTask
 import time
+from datetime import datetime
+
 
 class State (Enum):
   IDLE = 0
@@ -24,7 +26,6 @@ class BambuPrinter:
     self.print_task = PrintTask()
     self.first_time = True
     self.complete_task = False
-
 
   def ProccessMQTTMsg(self, msg):
     data = msg.payload.decode()
@@ -116,11 +117,11 @@ class BambuPrinter:
     
     if self.current_state != self.new_state:
       # Finished task printing. Print task is saved.
-      if self.new_state == State.IDLE:
+      if self.new_state == State.IDLE and self.current_state == State.PRINTING:
         print("Printer is idle.")
         self.print_task.percent_complete = self.current_percent
         self.print_task.status = "Complete"
-        self.print_task.end_time = time.time()
+        self.print_task.end_time = datetime.now().strftime("%H:%M:%S-%d-%m-%Y")
         print("Task complete", self.complete_task)
         if self.complete_task == True:
           self.print_task.ReportAndSaveTask()
@@ -131,14 +132,14 @@ class BambuPrinter:
         print("Printer is preparing.")
         self.complete_task = True
         self.print_task.CleanTask()
-        self.print_task.start_time = time.time()
+        self.print_task.start_time = datetime.now().strftime("%H:%M:%S-%d-%m-%Y")
         
       # Print taks is received and start printing without preparing
       elif(self.new_state == State.PRINTING and self.current_state != State.PREPARING):
         print("Printer is printing.")
         self.complete_task = True
         self.print_task.CleanTask()
-        self.print_task.start_time = time.time()
+        self.print_task.start_time = datetime.now().strftime("%H:%M:%S-%d-%m-%Y")
         self.print_task.init_percent = self.current_percent
 
       # Activate when really stating to print
@@ -146,11 +147,11 @@ class BambuPrinter:
         self.print_task.init_percent = self.current_percent
         
       # Print task is cancelled or failed. Print task is saved.
-      elif self.new_state == State.FAILED:
+      elif self.new_state == State.FAILED and self.current_state == State.PRINTING:
         print("Print failed.")
         self.print_task.percent_complete = self.current_percent
         self.print_task.status = "Failed"
-        self.print_task.end_time = time.time()
+        self.print_task.end_time = datetime.now().strftime("%H:%M:%S-%d-%m-%Y")
         if self.complete_task == True:
           self.print_task.ReportAndSaveTask()
         self.complete_task = False
