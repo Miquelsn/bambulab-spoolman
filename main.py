@@ -55,5 +55,5 @@ while True:
             break
     except Exception as e:
         helper_logs.log_error(e)
-        print("An error occurred in the loop. Check log_errors.txt for details.")
+        #print("An error occurred in the loop. Check log_errors.txt for details.")
 

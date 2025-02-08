@@ -74,7 +74,7 @@ def OnMessage(client, userdata, msg):
         bp.bambu_printer.ProccessMQTTMsg(msg)
     except Exception as e:
         helper_logs.log_error(e)
-        print("An error occurred in the loop. Check log_errors.txt for details.")
+        #print("An error occurred processing an mqtt msg. Check log_errors.txt for details.")
     
 def SendStatusMessage(client):
     """Sends a message to the local MQTT broker."""
