@@ -67,9 +67,10 @@ class PrintTask:
                     multiplier = 1
                     print("Error calculating multiplier")
                 print("Using multiplier: ", multiplier)
-                
+            
             for filament in self.teoric_filaments:
-                saved_filament = spoolman_filament.RegisterFilament(filament["filamentId"], multiplier*filament["weight"])
+                filament["weight"] = multiplier * filament["weight"]
+                saved_filament = spoolman_filament.RegisterFilament(filament["filamentId"], filament["weight"])
                 if saved_filament == True:
                     self.reported_filament.append(filament)
       

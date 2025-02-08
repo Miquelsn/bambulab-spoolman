@@ -133,6 +133,3 @@ def map_filaments():
         
     save_mappings(filament_mapping)
     print("Filament mapping saved!")
-
-if __name__ == "__main__":
-    map_filaments()
