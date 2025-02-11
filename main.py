@@ -13,6 +13,16 @@ import Spoolman.login
 import Local_MQTT.local_mqtt as MQTT
 import BambuPrinter as BambuPrinter
 
+import GUI.WebServer.flutter_web_server as flutter_web_server
+
+import GUI.WebServer.websockets_service as websocket_service
+
+print("Starting GUI")
+flutter_web_server.start_thread()
+print("GUI started")
+print("Starting WebSockets")
+websocket_service.start_websocket_server()
+print("Websocket started")
 
 # Get Bambu Cloud Credentials
 if not BambuCloud.login.TestToken():
@@ -46,6 +56,7 @@ filament.map_filaments()
 # Start and connect to the local MQTT broker
 MQTT.StartMQTT()
 print("FSM Started. Type 'exit' to exit.")
+
 
 while True:
     try:

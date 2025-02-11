@@ -24,7 +24,7 @@ This is currently in the alpha stage. It is functional, but there is still much 
 ## Installation & Usage
 ### Requirements
 - Python must be installed.
-- Required Python libraries: `paho-mqtt`, `json`, `requests`, `difflib`, `ref` and `configparser`.
+- Required Python libraries: `paho-mqtt`, `json`, `requests`, `difflib`, `ref`, `websockets` and `configparser`.
 
 ### Setup
 1. Run `initialization.py` and follow the terminal instructions:
