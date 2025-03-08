@@ -80,7 +80,7 @@ class BambuPrinter:
       filament = []
       nonAsignedFilament = 0
       for ams in task_detail["amsDetailMapping"]:
-        if ams["filamentId"] is None or ams["filamentId"]:
+        if ams["filamentId"] == "":
           print("Filament ID empty. Asigning to external spool")
           nonAsignedFilament += task_detail["weight"]
           

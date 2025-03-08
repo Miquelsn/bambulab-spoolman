@@ -3,7 +3,7 @@ import socketserver
 import webbrowser
 import threading
 
-PORT = 89
+PORT = 12345
 DIRECTORY = "Gui/bambulab_spoolman/build/web"
 
 class Handler(http.server.SimpleHTTPRequestHandler):
