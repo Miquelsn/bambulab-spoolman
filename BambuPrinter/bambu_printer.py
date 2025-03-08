@@ -26,6 +26,7 @@ class BambuPrinter:
     self.print_task = PrintTask()
     self.first_time = True
     self.complete_task = False
+    self.externalFilamentID = 0
 
   def ProccessMQTTMsg(self, msg):
     data = msg.payload.decode()
@@ -55,6 +56,8 @@ class BambuPrinter:
     pass
 
   def ExternalFilamentParser(self, msg):
+    if "tray_info_idx" in msg:
+      self.externalFilamentID = msg["tray_info_idx"]
     #print(msg)
     pass
 
@@ -71,11 +74,22 @@ class BambuPrinter:
       self.print_task.total_weight = task_detail["weight"]
       self.print_task.model_name = task_detail["title"]
       self.print_task.image_cover_url = task_detail["cover"]
+      
+      # ToDo: This is ams filament. If empty get filament from external spool mqtt
+      ## object►print►vt_tray►tray_info_idx is the filament ID. Weight can be getted from weight in task detail
       filament = []
+      nonAsignedFilament = 0
       for ams in task_detail["amsDetailMapping"]:
+        if ams["filamentId"] is None or ams["filamentId"]:
+          print("Filament ID empty. Asigning to external spool")
+          nonAsignedFilament += task_detail["weight"]
+          
         print(ams["filamentId"])
         print(ams["weight"])
         filament.append({ "filamentId": ams["filamentId"], "weight": ams["weight"]})
+      if nonAsignedFilament > 0:
+        print("Non asigned filament: ",nonAsignedFilament)
+        filament.append({ "filamentId": self.externalFilamentID, "weight": nonAsignedFilament})
       self.print_task.teoric_filaments = filament
 
   def SetPrintPercentatge(self, percentage):
