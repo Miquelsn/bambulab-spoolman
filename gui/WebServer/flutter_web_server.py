@@ -4,7 +4,7 @@ import webbrowser
 import threading
 
 PORT = 89
-DIRECTORY = "GUI/bambulab_spoolman/build/web"
+DIRECTORY = "Gui/bambulab_spoolman/build/web"
 
 class Handler(http.server.SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):

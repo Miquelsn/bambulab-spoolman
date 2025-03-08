@@ -13,9 +13,9 @@ import Spoolman.login
 import Local_MQTT.local_mqtt as MQTT
 import BambuPrinter as BambuPrinter
 
-import GUI.WebServer.flutter_web_server as flutter_web_server
+import Gui.WebServer.flutter_web_server as flutter_web_server
 
-import GUI.WebServer.websockets_service as websocket_service
+import Gui.WebServer.websockets_service as websocket_service
 
 print("Starting GUI")
 flutter_web_server.start_thread()
