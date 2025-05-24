@@ -77,7 +77,7 @@ class WebSocketService:
 
 # Wrapper to start in thread
 def start_websocket_server():
-    ws_service = WebSocketService(host='0.0.0.0', port=12346)
+    ws_service = WebSocketService(host='localhost', port=12346)
     websocket_thread = threading.Thread(target=ws_service.run_server)
     websocket_thread.daemon = True
     websocket_thread.start()
