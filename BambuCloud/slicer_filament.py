@@ -48,7 +48,7 @@ def GetSlicerFilaments():
         else:
             logger.log_error(f"Failed to get slicer filament with status code {response.status_code}: {response.text}")  
     except Exception as e:
-        logger.log_error(f"An error occurred while getting the slicer filament: {e}")    
+        logger.log_exception(e)
     return None
 
 def ProcessSlicerFilament(filaments):
@@ -76,4 +76,4 @@ def SaveFilamentsToFile(filaments):
                 file.write(str(filament) + "\n")
         logger.log_info(f"Bambu Studio filaments saved successfully to {filename}")
     except Exception as e:
-        logger.log_error(f"An error occurred while saving filaments: {e}")
+        logger.log_exception(e)

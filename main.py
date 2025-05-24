@@ -66,5 +66,5 @@ while True:
         if input() == "exit":
             break
     except Exception as e:
-        logger.log_error("e")
+        logger.log_exception(e)
 

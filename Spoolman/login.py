@@ -15,7 +15,7 @@ def TestSpoolmanApi(ip, port):
         else:
             logger.log_error(f"Failed to connect with status code {response.status_code}: {response.text}")
     except requests.RequestException as e:
-        logger.log_error(f"Error connecting to Spoolman API: {e}")
+        logger.log_exception(e)
     return False
 
 # Prompt user for Spoolman IP and Port

@@ -46,7 +46,7 @@ def GetJobID(taskID):
         else:
             logger.log_error(f"Failed to get job id with status code {response.status_code}: {response.text}")  
     except Exception as e:
-        logger.log_error(f"An error occurred while getting the tasks: {e}")    
+        logger.log_exception(e)    
     return None
 
 
@@ -75,5 +75,5 @@ def GetTaksDetail(jobID):
             logger.log_error(f"Failed to get tasks with status code {response.status_code}: {response.text}")  
         return None
     except Exception as e:
-        logger.log_error(f"An error occurred while getting the tasks: {e}")
+        logger.log_exception(e)
 

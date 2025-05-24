@@ -28,7 +28,7 @@ def GetSpoolmanFilaments():
         else:
             logger.log_error(f"Failed to get spoolman filaments with status code {response.status_code}: {response.text}")  
     except Exception as e:
-        logger.log_error(f"An error occurred while getting the spoolman filaments: {e}")    
+        logger.log_exception(e)    
     return None
 
 def ProcessSpoolmanFilament(filaments):
@@ -63,7 +63,7 @@ def SaveFilamentsToFile(filaments):
                 file.write(str(filament) + "\n")
         logger.log_info(f"Filaments saved successfully to {filename}")
     except Exception as e:
-        logger.log_error(f"An error occurred while saving filaments: {e}")
+        logger.log_exception(e)
         
 def LoadFilamentMapping():
     with open("filament_mapping.json", "r") as file:
@@ -94,5 +94,5 @@ def RegisterFilament(slicer_filamentID, weight):
         else:
             logger.log_error(f"Failed to get spoolman filaments with status code {response.status_code}: {response.text}")  
     except Exception as e:
-        logger.log_error(f"An error occurred while getting the spoolman filaments: {e}")    
+        logger.log_exception(e)    
     return False

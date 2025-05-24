@@ -50,7 +50,7 @@ def SendVerificationCode():
         else:
             logger.log_error(f"Failed to send verification code with status code {response.status_code}: {response.text}")
     except Exception as e:
-        logger.log_error(f"An error occurred while sending the verification code: {e}")
+        logger.log_exception(e)
     return False
 
 def LoginAndGetToken():
@@ -113,7 +113,7 @@ def LoginAndGetToken():
             logger.log_error(f"Login failed with status code {response.status_code}: {response.text}")
 
     except Exception as e:
-        logger.log_error(f"An error occurred during login: {e}")
+        logger.log_exception(e)
 
     return None
 
@@ -144,6 +144,6 @@ def TestToken():
         else:
             logger.log_error(f"Failed to test the access code {response.status_code}: {response.text}")
     except Exception as e:
-        logger.log_error(f"An error occurred while testing the verification code: {e}")
+        logger.log_exception(e)
     return False
 

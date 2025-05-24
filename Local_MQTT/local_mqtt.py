@@ -58,7 +58,7 @@ def CheckMQTTConnection():
         client.disconnect()
         return True
     except Exception as e:
-        logger.log_error(f"Failed to connect to MQTT broker at {printer_ip}: {e}")
+        logger.log_exception(e)
         return False
     
 # Callback when connecting to MQTT Broker
@@ -73,7 +73,7 @@ def OnMessage(client, userdata, msg):
     try:
         bp.bambu_printer.ProccessMQTTMsg(msg)
     except Exception as e:
-        logger.log_error(e)
+        logger.log_exception(e)
     
 def SendStatusMessage(client):
     """Sends a message to the local MQTT broker."""
