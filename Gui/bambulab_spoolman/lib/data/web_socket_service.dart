@@ -46,7 +46,7 @@ Future<void> _connect() async {
       print("❌ Could not discover server.");
       return;
     }
-
+    print("Discovered WebSocket server at: $discoveredUrl");
     _channel = WebSocketChannel.connect(Uri.parse(discoveredUrl));
     isConnected = true;
     print("✅ Connected to $discoveredUrl");
