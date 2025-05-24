@@ -61,10 +61,7 @@ logger.log_info("FSM Started. Type 'exit' to exit.")
 
 while True:
     try:
-        time.sleep(1)
-        # Exit if user types 'exit'
-        if input() == "exit":
-            break
+        time.sleep(2)
     except Exception as e:
         logger.log_exception(e)
 
