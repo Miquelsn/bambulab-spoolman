@@ -31,13 +31,16 @@ class Logger:
 
     def log_info(self, message: str):
         self._write_log(f"INFO: {message}")
+        print(f"INFO: {message}")
 
     def log_error(self, message: str):
         self._write_log(f"ERROR: {message}")
+        print(f"ERROR: {message}")
         
     def log_exception(self, error: Exception):
         err_message = ''.join(traceback.format_exception(type(error), error, error.__traceback__))
         self._write_log(f"EXCEPTION:\n{err_message}")
+        print(f"EXCEPTION:\n{err_message}")
         
     def get_last_logs(self):
         with self.lock:
