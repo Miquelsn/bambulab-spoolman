@@ -2,6 +2,7 @@ import os
 import sys
 import time
 
+from Gui.WebServer.auto_discover import start_broadcast_thread
 from helper_logs import logger
 
 from Filament import filament
@@ -21,6 +22,9 @@ import Gui.WebServer.websockets_service as websocket_service
 logger.log_info("Starting GUI")
 flutter_web_server.start_thread()
 logger.log_info("GUI started")
+logger.log_info("Starting autodiscover")
+start_broadcast_thread()
+logger.log_info("Autodiscover started")
 logger.log_info("Starting WebSockets")
 websocket_service.start_websocket_server()
 logger.log_info("Websocket started")

@@ -3,6 +3,7 @@ import websockets
 import threading
 import json
 
+
 class WebSocketService:
     def __init__(self, host='localhost', port=12346):
         self.host = host
