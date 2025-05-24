@@ -1,0 +1,12 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Run Main App",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/main.py",  // <- your main file path here
+      "console": "integratedTerminal"
+    }
+  ]
+}

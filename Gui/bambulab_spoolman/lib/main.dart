@@ -22,7 +22,7 @@ class MyApp extends StatelessWidget {
       title: 'Spoolman-Bambulab',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color.fromARGB(255, 109, 230, 91),
+          seedColor: const Color.fromARGB(255, 38, 224, 150),
         ),
         useMaterial3: true,
       ),

@@ -2,6 +2,8 @@ import requests
 import os
 from tools import *
 import json
+from helper_logs import logger
+
 
 class SpoolmanFilament:
     def __init__(self):
@@ -24,9 +26,9 @@ def GetSpoolmanFilaments():
         if response.status_code == 200:
             return response.json()
         else:
-            print(f"Failed to get spoolman filaments with status code {response.status_code}: {response.text}")  
+            logger.log_error(f"Failed to get spoolman filaments with status code {response.status_code}: {response.text}")  
     except Exception as e:
-        print(f"An error occurred while getting the spoolman filaments: {e}")    
+        logger.log_error(f"An error occurred while getting the spoolman filaments: {e}")    
     return None
 
 def ProcessSpoolmanFilament(filaments):
@@ -59,9 +61,9 @@ def SaveFilamentsToFile(filaments):
         with open(filename, "w", encoding="utf-8") as file:
             for filament in filaments:
                 file.write(str(filament) + "\n")
-        print(f"Filaments saved successfully to {filename}")
+        logger.log_info(f"Filaments saved successfully to {filename}")
     except Exception as e:
-        print(f"An error occurred while saving filaments: {e}")
+        logger.log_error(f"An error occurred while saving filaments: {e}")
         
 def LoadFilamentMapping():
     with open("filament_mapping.json", "r") as file:
@@ -75,7 +77,7 @@ def RegisterFilament(slicer_filamentID, weight):
     spoolman_filamentID = GetSpoolmanID(filament_mapping, slicer_filamentID)
     
     if spoolman_filamentID is None:
-        print(f"No corresponding spoolman filament for {slicer_filamentID}")
+        logger.log_error(f"No corresponding spoolman filament for {slicer_filamentID}")
         return False
       
     # Load credentials from the file
@@ -90,7 +92,7 @@ def RegisterFilament(slicer_filamentID, weight):
         if response.status_code == 200:
             return True
         else:
-            print(f"Failed to get spoolman filaments with status code {response.status_code}: {response.text}")  
+            logger.log_error(f"Failed to get spoolman filaments with status code {response.status_code}: {response.text}")  
     except Exception as e:
-        print(f"An error occurred while getting the spoolman filaments: {e}")    
+        logger.log_error(f"An error occurred while getting the spoolman filaments: {e}")    
     return False

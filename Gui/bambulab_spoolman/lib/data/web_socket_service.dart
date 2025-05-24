@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:web_socket_channel/status.dart' as status;
 import 'dart:async';
@@ -6,16 +8,19 @@ class WebSocketService {
   bool isConnected = false;
   WebSocketChannel? _channel;
   final StreamController<String> _messageController = StreamController.broadcast(); // ✅ Broadcast stream
+  VoidCallback? onConnectedCallback;
 
-  WebSocketService() {
+
+  WebSocketService({this.onConnectedCallback}) {
     _connect();
   }
 
   void _connect() {
     try {
-      _channel = WebSocketChannel.connect(Uri.parse("ws://localhost:12345/ws"));
+      _channel = WebSocketChannel.connect(Uri.parse("ws://localhost:12346"));
       isConnected = true;
       print("✅ WebSocket connected.");
+      onConnectedCallback?.call(); // 👈 notify connection
 
       _channel!.stream.listen(
         (message) {

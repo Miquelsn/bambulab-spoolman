@@ -1,0 +1,234 @@
+2025-05-24 19:49:47 - INFO: Starting GUI
+2025-05-24 19:49:47 - INFO: GUI started
+2025-05-24 19:49:47 - INFO: Starting WebSockets
+2025-05-24 19:49:47 - INFO: Websocket started
+2025-05-24 19:49:47 - INFO: Test completed successfully
+2025-05-24 19:49:47 - INFO: printer_ip found in credentials: 192.168.1.190
+2025-05-24 19:49:48 - INFO: Successfully connected to BambuLab Printer.
+2025-05-24 19:49:48 - INFO: Spoolman API is working correctly!
+2025-05-24 19:49:48 - INFO: Spoolman configuration working
+2025-05-24 19:49:49 - INFO: Bambu Studio filaments saved successfully to slicer_filaments.txt
+2025-05-24 19:49:49 - INFO: Filaments saved successfully to spoolman_filaments.txt
+2025-05-24 19:49:49 - INFO: Total Bambu Filaments: 13
+2025-05-24 19:49:49 - INFO: Total Spoolman Filaments: 13
+2025-05-24 19:49:49 - INFO: Filament mapping saved!
+2025-05-24 19:49:50 - INFO: Connected to MQTT broker at 192.168.1.190
+2025-05-24 19:49:55 - INFO: FSM Started. Type 'exit' to exit.
+2025-05-24 19:49:56 - INFO: Current state 255
+2025-05-24 19:49:56 - INFO: Gcode state FINISH
+2025-05-24 19:49:57 - INFO: Pd30ce59
+2025-05-24 19:49:57 - INFO: 9.32
+2025-05-24 19:59:51 - INFO: Starting GUI
+2025-05-24 19:59:51 - INFO: GUI started
+2025-05-24 19:59:51 - INFO: Starting WebSockets
+2025-05-24 19:59:51 - INFO: Websocket started
+2025-05-24 19:59:51 - INFO: Test completed successfully
+2025-05-24 19:59:51 - INFO: printer_ip found in credentials: 192.168.1.190
+2025-05-24 19:59:52 - INFO: Successfully connected to BambuLab Printer.
+2025-05-24 19:59:52 - INFO: Spoolman API is working correctly!
+2025-05-24 19:59:52 - INFO: Spoolman configuration working
+2025-05-24 19:59:53 - INFO: Bambu Studio filaments saved successfully to slicer_filaments.txt
+2025-05-24 19:59:53 - INFO: Filaments saved successfully to spoolman_filaments.txt
+2025-05-24 19:59:53 - INFO: Total Bambu Filaments: 13
+2025-05-24 19:59:53 - INFO: Total Spoolman Filaments: 13
+2025-05-24 19:59:53 - INFO: Filament mapping saved!
+2025-05-24 19:59:54 - INFO: Connected to MQTT broker at 192.168.1.190
+2025-05-24 19:59:59 - INFO: FSM Started. Type 'exit' to exit.
+2025-05-24 20:00:00 - INFO: Current state 255
+2025-05-24 20:00:00 - INFO: Gcode state FINISH
+2025-05-24 20:00:01 - INFO: Pd30ce59
+2025-05-24 20:00:01 - INFO: 9.32
+2025-05-24 20:08:19 - INFO: Test completed successfully
+2025-05-24 20:08:19 - INFO: printer_ip found in credentials: 192.168.1.190
+2025-05-24 20:08:20 - INFO: Successfully connected to BambuLab Printer.
+2025-05-24 20:08:20 - INFO: Spoolman API is working correctly!
+2025-05-24 20:08:20 - INFO: Spoolman configuration working
+2025-05-24 20:08:20 - INFO: Bambu Studio filaments saved successfully to slicer_filaments.txt
+2025-05-24 20:08:21 - INFO: Filaments saved successfully to spoolman_filaments.txt
+2025-05-24 20:08:21 - INFO: Total Bambu Filaments: 13
+2025-05-24 20:08:21 - INFO: Total Spoolman Filaments: 13
+2025-05-24 20:08:21 - INFO: Filament mapping saved!
+2025-05-24 20:08:21 - INFO: Initialization Complete Correctly
+2025-05-24 20:08:21 - INFO: Run main.py
+2025-05-24 20:08:24 - INFO: Test completed successfully
+2025-05-24 20:08:24 - INFO: printer_ip found in credentials: 192.168.1.190
+2025-05-24 20:08:25 - INFO: Successfully connected to BambuLab Printer.
+2025-05-24 20:08:25 - INFO: Spoolman API is working correctly!
+2025-05-24 20:08:25 - INFO: Spoolman configuration working
+2025-05-24 20:08:26 - INFO: Bambu Studio filaments saved successfully to slicer_filaments.txt
+2025-05-24 20:08:26 - INFO: Filaments saved successfully to spoolman_filaments.txt
+2025-05-24 20:08:26 - INFO: Total Bambu Filaments: 13
+2025-05-24 20:08:26 - INFO: Total Spoolman Filaments: 13
+2025-05-24 20:08:26 - INFO: Filament mapping saved!
+2025-05-24 20:08:26 - INFO: Initialization Complete Correctly
+2025-05-24 20:08:26 - INFO: Run main.py
+2025-05-24 20:08:49 - INFO: Starting GUI
+2025-05-24 20:08:49 - INFO: GUI started
+2025-05-24 20:08:49 - INFO: Starting WebSockets
+2025-05-24 20:08:49 - INFO: Websocket started
+2025-05-24 20:08:50 - INFO: Test completed successfully
+2025-05-24 20:08:50 - INFO: printer_ip found in credentials: 192.168.1.190
+2025-05-24 20:08:51 - INFO: Successfully connected to BambuLab Printer.
+2025-05-24 20:08:51 - INFO: Spoolman API is working correctly!
+2025-05-24 20:08:51 - INFO: Spoolman configuration working
+2025-05-24 20:08:51 - INFO: Bambu Studio filaments saved successfully to slicer_filaments.txt
+2025-05-24 20:08:52 - INFO: Filaments saved successfully to spoolman_filaments.txt
+2025-05-24 20:08:52 - INFO: Total Bambu Filaments: 13
+2025-05-24 20:08:52 - INFO: Total Spoolman Filaments: 13
+2025-05-24 20:08:52 - INFO: Filament mapping saved!
+2025-05-24 20:08:53 - INFO: Connected to MQTT broker at 192.168.1.190
+2025-05-24 20:08:58 - INFO: FSM Started. Type 'exit' to exit.
+2025-05-24 20:08:58 - INFO: Current state 255
+2025-05-24 20:08:58 - INFO: Gcode state FINISH
+2025-05-24 20:08:59 - INFO: Pd30ce59
+2025-05-24 20:08:59 - INFO: 9.32
+2025-05-24 20:10:33 - INFO: Test completed successfully
+2025-05-24 20:10:33 - INFO: printer_ip found in credentials: 192.168.1.190
+2025-05-24 20:10:34 - INFO: Successfully connected to BambuLab Printer.
+2025-05-24 20:10:35 - INFO: Spoolman API is working correctly!
+2025-05-24 20:10:35 - INFO: Spoolman configuration working
+2025-05-24 20:10:35 - INFO: Bambu Studio filaments saved successfully to slicer_filaments.txt
+2025-05-24 20:10:35 - INFO: Filaments saved successfully to spoolman_filaments.txt
+2025-05-24 20:10:35 - INFO: Total Bambu Filaments: 13
+2025-05-24 20:10:35 - INFO: Total Spoolman Filaments: 13
+2025-05-24 20:10:35 - INFO: Filament mapping saved!
+2025-05-24 20:10:35 - INFO: Initialization Complete Correctly
+2025-05-24 20:10:35 - INFO: Run main.py
+2025-05-24 20:11:14 - INFO: Starting GUI
+2025-05-24 20:11:14 - INFO: GUI started
+2025-05-24 20:11:14 - INFO: Starting WebSockets
+2025-05-24 20:11:14 - INFO: Websocket started
+2025-05-24 20:11:15 - INFO: Test completed successfully
+2025-05-24 20:11:15 - INFO: printer_ip found in credentials: 192.168.1.190
+2025-05-24 20:11:16 - INFO: Successfully connected to BambuLab Printer.
+2025-05-24 20:11:16 - INFO: Spoolman API is working correctly!
+2025-05-24 20:11:16 - INFO: Spoolman configuration working
+2025-05-24 20:11:16 - INFO: Bambu Studio filaments saved successfully to slicer_filaments.txt
+2025-05-24 20:11:17 - INFO: Filaments saved successfully to spoolman_filaments.txt
+2025-05-24 20:11:17 - INFO: Total Bambu Filaments: 13
+2025-05-24 20:11:17 - INFO: Total Spoolman Filaments: 13
+2025-05-24 20:11:17 - INFO: Filament mapping saved!
+2025-05-24 20:11:18 - INFO: Connected to MQTT broker at 192.168.1.190
+2025-05-24 20:11:23 - INFO: FSM Started. Type 'exit' to exit.
+2025-05-24 20:11:23 - INFO: Current state 255
+2025-05-24 20:11:23 - INFO: Gcode state FINISH
+2025-05-24 20:11:24 - INFO: Pd30ce59
+2025-05-24 20:11:24 - INFO: 9.32
+2025-05-24 20:13:24 - INFO: Starting GUI
+2025-05-24 20:13:24 - INFO: GUI started
+2025-05-24 20:13:24 - INFO: Starting WebSockets
+2025-05-24 20:13:24 - INFO: Websocket started
+2025-05-24 20:13:24 - INFO: Test completed successfully
+2025-05-24 20:13:24 - INFO: printer_ip found in credentials: 192.168.1.190
+2025-05-24 20:13:25 - INFO: Successfully connected to BambuLab Printer.
+2025-05-24 20:13:26 - INFO: Spoolman API is working correctly!
+2025-05-24 20:13:26 - INFO: Spoolman configuration working
+2025-05-24 20:13:26 - INFO: Bambu Studio filaments saved successfully to slicer_filaments.txt
+2025-05-24 20:13:27 - INFO: Filaments saved successfully to spoolman_filaments.txt
+2025-05-24 20:13:27 - INFO: Total Bambu Filaments: 13
+2025-05-24 20:13:27 - INFO: Total Spoolman Filaments: 13
+2025-05-24 20:13:27 - INFO: Filament mapping saved!
+2025-05-24 20:13:28 - INFO: Connected to MQTT broker at 192.168.1.190
+2025-05-24 20:13:33 - INFO: FSM Started. Type 'exit' to exit.
+2025-05-24 20:13:33 - INFO: Current state 255
+2025-05-24 20:13:33 - INFO: Gcode state FINISH
+2025-05-24 20:13:34 - INFO: Pd30ce59
+2025-05-24 20:13:34 - INFO: 9.32
+2025-05-24 20:15:09 - INFO: Starting GUI
+2025-05-24 20:15:09 - INFO: GUI started
+2025-05-24 20:15:09 - INFO: Starting WebSockets
+2025-05-24 20:15:09 - INFO: Websocket started
+2025-05-24 20:15:09 - INFO: Test completed successfully
+2025-05-24 20:15:09 - INFO: printer_ip found in credentials: 192.168.1.190
+2025-05-24 20:15:10 - INFO: Successfully connected to BambuLab Printer.
+2025-05-24 20:15:10 - INFO: Spoolman API is working correctly!
+2025-05-24 20:15:10 - INFO: Spoolman configuration working
+2025-05-24 20:15:11 - INFO: Bambu Studio filaments saved successfully to slicer_filaments.txt
+2025-05-24 20:15:11 - INFO: Filaments saved successfully to spoolman_filaments.txt
+2025-05-24 20:15:11 - INFO: Total Bambu Filaments: 13
+2025-05-24 20:15:11 - INFO: Total Spoolman Filaments: 13
+2025-05-24 20:15:11 - INFO: Filament mapping saved!
+2025-05-24 20:15:12 - INFO: Connected to MQTT broker at 192.168.1.190
+2025-05-24 20:15:17 - INFO: FSM Started. Type 'exit' to exit.
+2025-05-24 20:15:18 - INFO: Current state 255
+2025-05-24 20:15:18 - INFO: Gcode state FINISH
+2025-05-24 20:15:18 - INFO: Pd30ce59
+2025-05-24 20:15:18 - INFO: 9.32
+2025-05-24 20:16:24 - INFO: Starting GUI
+2025-05-24 20:16:24 - INFO: GUI started
+2025-05-24 20:16:24 - INFO: Starting WebSockets
+2025-05-24 20:16:24 - INFO: Websocket started
+2025-05-24 20:16:25 - INFO: Test completed successfully
+2025-05-24 20:16:25 - INFO: printer_ip found in credentials: 192.168.1.190
+2025-05-24 20:16:26 - INFO: Successfully connected to BambuLab Printer.
+2025-05-24 20:16:26 - INFO: Spoolman API is working correctly!
+2025-05-24 20:16:26 - INFO: Spoolman configuration working
+2025-05-24 20:16:27 - INFO: Bambu Studio filaments saved successfully to slicer_filaments.txt
+2025-05-24 20:16:27 - INFO: Filaments saved successfully to spoolman_filaments.txt
+2025-05-24 20:16:27 - INFO: Total Bambu Filaments: 13
+2025-05-24 20:16:27 - INFO: Total Spoolman Filaments: 13
+2025-05-24 20:16:27 - INFO: Filament mapping saved!
+2025-05-24 20:16:28 - INFO: Connected to MQTT broker at 192.168.1.190
+2025-05-24 20:16:33 - INFO: FSM Started. Type 'exit' to exit.
+2025-05-24 20:16:33 - INFO: Current state 255
+2025-05-24 20:16:33 - INFO: Gcode state FINISH
+2025-05-24 20:16:34 - INFO: Pd30ce59
+2025-05-24 20:16:34 - INFO: 9.32
+2025-05-24 20:18:08 - INFO: Starting GUI
+2025-05-24 20:18:08 - INFO: GUI started
+2025-05-24 20:18:08 - INFO: Starting WebSockets
+2025-05-24 20:18:08 - INFO: Websocket started
+2025-05-24 20:18:08 - INFO: Test completed successfully
+2025-05-24 20:18:08 - INFO: printer_ip found in credentials: 192.168.1.190
+2025-05-24 20:18:09 - INFO: Successfully connected to BambuLab Printer.
+2025-05-24 20:18:10 - INFO: Spoolman API is working correctly!
+2025-05-24 20:18:10 - INFO: Spoolman configuration working
+2025-05-24 20:18:10 - INFO: Bambu Studio filaments saved successfully to slicer_filaments.txt
+2025-05-24 20:18:11 - INFO: Filaments saved successfully to spoolman_filaments.txt
+2025-05-24 20:18:11 - INFO: Total Bambu Filaments: 13
+2025-05-24 20:18:11 - INFO: Total Spoolman Filaments: 13
+2025-05-24 20:18:11 - INFO: Filament mapping saved!
+2025-05-24 20:18:13 - INFO: Starting GUI
+2025-05-24 20:18:13 - INFO: GUI started
+2025-05-24 20:18:13 - INFO: Starting WebSockets
+2025-05-24 20:18:13 - INFO: Websocket started
+2025-05-24 20:18:14 - INFO: Test completed successfully
+2025-05-24 20:18:14 - INFO: printer_ip found in credentials: 192.168.1.190
+2025-05-24 20:18:15 - INFO: Successfully connected to BambuLab Printer.
+2025-05-24 20:18:15 - INFO: Spoolman API is working correctly!
+2025-05-24 20:18:15 - INFO: Spoolman configuration working
+2025-05-24 20:18:15 - INFO: Bambu Studio filaments saved successfully to slicer_filaments.txt
+2025-05-24 20:18:16 - INFO: Filaments saved successfully to spoolman_filaments.txt
+2025-05-24 20:18:16 - INFO: Total Bambu Filaments: 13
+2025-05-24 20:18:16 - INFO: Total Spoolman Filaments: 13
+2025-05-24 20:18:16 - INFO: Filament mapping saved!
+2025-05-24 20:18:17 - INFO: Connected to MQTT broker at 192.168.1.190
+2025-05-24 20:18:22 - INFO: FSM Started. Type 'exit' to exit.
+2025-05-24 20:18:22 - INFO: Current state 255
+2025-05-24 20:18:22 - INFO: Gcode state FINISH
+2025-05-24 20:18:23 - INFO: Pd30ce59
+2025-05-24 20:18:23 - INFO: 9.32
+2025-05-24 20:20:44 - INFO: Starting GUI
+2025-05-24 20:20:44 - INFO: GUI started
+2025-05-24 20:20:44 - INFO: Starting WebSockets
+2025-05-24 20:20:44 - INFO: Websocket started
+2025-05-24 20:20:45 - INFO: Test completed successfully
+2025-05-24 20:20:45 - INFO: printer_ip found in credentials: 192.168.1.190
+2025-05-24 20:20:46 - INFO: Successfully connected to BambuLab Printer.
+2025-05-24 20:20:46 - INFO: Spoolman API is working correctly!
+2025-05-24 20:20:46 - INFO: Spoolman configuration working
+2025-05-24 20:20:47 - INFO: Bambu Studio filaments saved successfully to slicer_filaments.txt
+2025-05-24 20:20:47 - INFO: Filaments saved successfully to spoolman_filaments.txt
+2025-05-24 20:20:47 - INFO: Total Bambu Filaments: 13
+2025-05-24 20:20:47 - INFO: Total Spoolman Filaments: 13
+2025-05-24 20:20:47 - INFO: Filament mapping saved!
+2025-05-24 20:20:48 - INFO: Connected to MQTT broker at 192.168.1.190
+2025-05-24 20:20:53 - INFO: FSM Started. Type 'exit' to exit.
+2025-05-24 20:20:54 - INFO: Current state 255
+2025-05-24 20:20:54 - INFO: Gcode state FINISH
+2025-05-24 20:20:55 - INFO: Pd30ce59
+2025-05-24 20:20:55 - INFO: 9.32
+2025-05-24 20:25:30 - INFO: Starting GUI
+2025-05-24 20:25:30 - INFO: GUI started
+2025-05-24 20:25:30 - INFO: Starting WebSockets
+2025-05-24 20:25:30 - INFO: Websocket started

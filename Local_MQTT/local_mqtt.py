@@ -2,7 +2,7 @@ import re
 import time
 import paho.mqtt.client as mqtt
 
-import helper_logs
+from helper_logs import logger
 import ssl
 PORT = 8883  # MQTT over TLS
 USERNAME = "bblp"  # Fixed username for local MQTT
@@ -25,12 +25,12 @@ def GetPrinterIP():
     printer_ip = credentials.get('DEFAULT','printer_ip', fallback = None)
     
     if printer_ip and IsValidIp(printer_ip):
-        print(f"printer_ip found in credentials: {printer_ip}")
+        logger.log_info(f"printer_ip found in credentials: {printer_ip}")
         if CheckMQTTConnection():
-            print("Successfully connected to BambuLab Printer.")
+            logger.log_info("Successfully connected to BambuLab Printer.")
             return
         else: 
-            print("Failed to connect to BambuLab Printer. Ensure printer is power" 
+            logger.log_error("Failed to connect to BambuLab Printer. Ensure printer is power" 
                  " on and connected to the network.")
 
     printer_ip = input("Enter your printer_ip (e.g., 192.168.1.100): ")
@@ -38,10 +38,10 @@ def GetPrinterIP():
         if IsValidIp(printer_ip):
             SaveNewToken("printer_ip", printer_ip)
             if CheckMQTTConnection():
-                print("Successfully connected to BambuLab Printer.")
+                logger.log_info("Successfully connected to BambuLab Printer.")
                 break
         else:
-            print("Invalid IP address. Ensure printer is power on and connected "
+            logger.log_error("Invalid IP address. Ensure printer is power on and connected "
                   "to the network.\nPlease try again.")
 
 def CheckMQTTConnection():
@@ -58,7 +58,7 @@ def CheckMQTTConnection():
         client.disconnect()
         return True
     except Exception as e:
-        print(f"Failed to connect to MQTT broker at {printer_ip}: {e}")
+        logger.log_error(f"Failed to connect to MQTT broker at {printer_ip}: {e}")
         return False
     
 # Callback when connecting to MQTT Broker
@@ -73,8 +73,7 @@ def OnMessage(client, userdata, msg):
     try:
         bp.bambu_printer.ProccessMQTTMsg(msg)
     except Exception as e:
-        helper_logs.log_error(e)
-        #print("An error occurred processing an mqtt msg. Check log_errors.txt for details.")
+        logger.log_error(e)
     
 def SendStatusMessage(client):
     """Sends a message to the local MQTT broker."""
@@ -107,6 +106,6 @@ def StartMQTT():
     client.on_message = OnMessage
     client.connect(printer_ip, PORT, 60)
     client.loop_start()
-    print(f"Connected to MQTT broker at {printer_ip}")
+    logger.log_info(f"Connected to MQTT broker at {printer_ip}")
     time.sleep(5)
     SendStatusMessage(client)

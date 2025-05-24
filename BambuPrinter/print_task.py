@@ -1,6 +1,8 @@
 import json
 import os
 import Spoolman.spoolman_filament as spoolman_filament
+from helper_logs import logger
+
 
 class PrintTask:
   def __init__(self):
@@ -57,16 +59,16 @@ class PrintTask:
         if self.teoric_filaments:
             self.reported_filament = []  # Inicializar si es None
             if self.percent_complete == 100:
-                print("Complete Taks")
+                logger.log_info("Complete Taks")
                 multiplier = 1
             else:
-                print("No complete task")
+                logger.log_error("No complete task")
                 try:
                     multiplier = (self.percent_complete-self.init_percent)/(100-self.init_percent)
                 except:
                     multiplier = 1
-                    print("Error calculating multiplier")
-                print("Using multiplier: ", multiplier)
+                    logger.log_error("Error calculating multiplier")
+                logger.log_info("Using multiplier: ", multiplier)
             
             for filament in self.teoric_filaments:
                 filament["weight"] = multiplier * filament["weight"]
@@ -92,4 +94,4 @@ class PrintTask:
       with open(file_name, "w") as file:
           json.dump(tasks, file, indent=4)
       
-      print(f"Task saved successfully to {file_name}.")
+      logger.log_info(f"Task saved successfully to {file_name}.")

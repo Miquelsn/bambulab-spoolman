@@ -2,7 +2,8 @@ import os
 import sys
 import time
 
-import helper_logs
+from helper_logs import logger
+
 from Filament import filament
 import BambuCloud.login
 import BambuCloud.slicer_filament
@@ -17,18 +18,18 @@ import Gui.WebServer.flutter_web_server as flutter_web_server
 
 import Gui.WebServer.websockets_service as websocket_service
 
-print("Starting GUI")
+logger.log_info("Starting GUI")
 flutter_web_server.start_thread()
-print("GUI started")
-print("Starting WebSockets")
+logger.log_info("GUI started")
+logger.log_info("Starting WebSockets")
 websocket_service.start_websocket_server()
-print("Websocket started")
+logger.log_info("Websocket started")
 
 # Get Bambu Cloud Credentials
 if not BambuCloud.login.TestToken():
     BambuCloud.login.LoginAndGetToken()
     if not BambuCloud.login.TestToken():
-        print("Failed to get token. Retrying in 5 minutes.")
+        logger.log_error("Failed to get token. Retrying in 5 minutes.")
         time.sleep(300)
         exit()
 
@@ -55,7 +56,7 @@ filament.map_filaments()
 
 # Start and connect to the local MQTT broker
 MQTT.StartMQTT()
-print("FSM Started. Type 'exit' to exit.")
+logger.log_info("FSM Started. Type 'exit' to exit.")
 
 
 while True:
@@ -65,6 +66,5 @@ while True:
         if input() == "exit":
             break
     except Exception as e:
-        helper_logs.log_error(e)
-        #print("An error occurred in the loop. Check log_errors.txt for details.")
+        logger.log_error("e")
 

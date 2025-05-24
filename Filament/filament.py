@@ -1,6 +1,8 @@
 import json
 import difflib
 import re
+from helper_logs import logger
+
 
 # File paths
 BAMBU_FILE = "slicer_filaments.txt"
@@ -68,8 +70,8 @@ def map_filaments():
     used_spool_ids = set(filament_mapping.values())
     used_bambu_ids = set(filament_mapping.keys())
     
-    print(f"Total Bambu Filaments: {len(bambu_filaments)}")
-    print(f"Total Spoolman Filaments: {len(spoolman_filaments)}")
+    logger.log_info(f"Total Bambu Filaments: {len(bambu_filaments)}")
+    logger.log_info(f"Total Spoolman Filaments: {len(spoolman_filaments)}")
     
     pending_filaments = [item for item in bambu_filaments.items() if item[1]["id"] not in used_bambu_ids]
     skipped_filaments = []
@@ -79,11 +81,11 @@ def map_filaments():
         suggested_match = find_best_match(bambu_data, spoolman_filaments, used_spool_ids)
         
         if not suggested_match:
-            print(f"No close match for '{bambu_name}', adding to skipped list.")
+            logger.log_error(f"No close match for '{bambu_name}', adding to skipped list.")
             skipped_filaments.append((bambu_name, bambu_data))
             continue
         
-        print(f"Suggested match: '{bambu_name}' -> '{suggested_match}' (Spool ID: {spoolman_filaments[suggested_match]['id']})")
+        logger.log_info(f"Suggested match: '{bambu_name}' -> '{suggested_match}' (Spool ID: {spoolman_filaments[suggested_match]['id']})")
         user_input = input("Press Enter to accept, type a Spool ID, or 'pass' to skip: ").strip()
         
         if user_input.lower() == "pass":
@@ -100,22 +102,22 @@ def map_filaments():
             filament_mapping[bambu_data["id"]] = selected_spool_id
             used_spool_ids.add(selected_spool_id)
             used_bambu_ids.add(bambu_data["id"])
-            print(f"Mapped {bambu_name} -> Spool ID: {selected_spool_id}")
+            logger.log_info(f"Mapped {bambu_name} -> Spool ID: {selected_spool_id}")
         else:
             if not selected_spool_id:
-                print("\033[91mSpoolman Filament Not Found\033[0m")
+                logger.log_error("\033[91mSpoolman Filament Not Found\033[0m")
             else:
-                print("\033[91mSpoolman Filament Used in Another Bambulab filament\033[0m")
+                logger.log_error("\033[91mSpoolman Filament Used in Another Bambulab filament\033[0m")
             skipped_filaments.append((bambu_name, bambu_data))
 
     
     if skipped_filaments:
-        print("\nRevisiting skipped filaments with fallback suggestions...")
+        logger.log_info("\nRevisiting skipped filaments with fallback suggestions...")
         for bambu_name, bambu_data in skipped_filaments:
             fallback_match = get_fallback_match(spoolman_filaments, used_spool_ids)
             
             if fallback_match:
-                print(f"Fallback match for '{bambu_name}' -> '{fallback_match}' (Spool ID: {spoolman_filaments[fallback_match]['id']})")
+                logger.log_info(f"Fallback match for '{bambu_name}' -> '{fallback_match}' (Spool ID: {spoolman_filaments[fallback_match]['id']})")
                 user_input = input("Press Enter to accept or type a Spool ID: ").strip()
                 
                 selected_spool_id = spoolman_filaments.get(user_input, {}).get("id") if user_input else spoolman_filaments[fallback_match]["id"]
@@ -124,12 +126,12 @@ def map_filaments():
                     filament_mapping[bambu_data["id"]] = selected_spool_id
                     used_spool_ids.add(selected_spool_id)
                     used_bambu_ids.add(bambu_data["id"])
-                    print(f"Mapped {bambu_name} -> Spool ID: {selected_spool_id}")
+                    logger.log_info(f"Mapped {bambu_name} -> Spool ID: {selected_spool_id}")
     
     if len(skipped_filaments) != 0:
-        print("\033[91mError, skipped filaments are not empty\n Not all bambu filaments are mapped\033[0m")
-        print("List of filaments not saved: ", skipped_filaments)
+        logger.log_error("\033[91mError, skipped filaments are not empty\n Not all filaments are mapped\033[0m")
+        logger.log_error("List of filaments not saved: ", skipped_filaments)
 
         
     save_mappings(filament_mapping)
-    print("Filament mapping saved!")
+    logger.log_info("Filament mapping saved!")

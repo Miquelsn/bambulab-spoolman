@@ -2,8 +2,10 @@ import http.server
 import socketserver
 import webbrowser
 import threading
+import os
 
-PORT = 12345
+PORT = 2323
+# Should point to the *folder*, not the index.html file
 DIRECTORY = "Gui/bambulab_spoolman/build/web"
 
 class Handler(http.server.SimpleHTTPRequestHandler):
@@ -11,9 +13,8 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         super().__init__(*args, directory=DIRECTORY, **kwargs)
 
     def log_message(self, format, *args):
-        pass  # This suppresses logging
+        pass  # Suppress logs if desired
 
-# Start server in a thread
 def start_server():
     with socketserver.TCPServer(("0.0.0.0", PORT), Handler) as httpd:
         print(f"Serving Flutter web app at http://127.0.0.1:{PORT}")

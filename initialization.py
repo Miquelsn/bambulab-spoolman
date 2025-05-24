@@ -2,7 +2,7 @@ import os
 import sys
 import time
 
-import helper_logs
+from helper_logs import logger
 from Filament import filament
 import BambuCloud.login
 import BambuCloud.slicer_filament
@@ -19,7 +19,7 @@ import BambuPrinter as BambuPrinter
 if not BambuCloud.login.TestToken():
     BambuCloud.login.LoginAndGetToken()
     if not BambuCloud.login.TestToken():
-        print("Failed to get token. Retrying in 5 minutes.")
+        logger.log_error("Failed to get token. Retrying in 5 minutes.")
         time.sleep(300)
         exit()
 
@@ -44,5 +44,5 @@ if filaments:
 # Map filaments
 filament.map_filaments()
 
-print("Initialization Complete Correctly")
-print("Run main.py")
+logger.log_info("Initialization Complete Correctly")
+logger.log_info("Run main.py")

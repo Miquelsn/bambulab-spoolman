@@ -1,6 +1,7 @@
 import requests
 import os
 from tools import *
+from helper_logs import logger
 
 # API endpoint for login and sending the verification code
 LOGIN_URL = "https://api.bambulab.com/v1/user-service/user/login"
@@ -32,7 +33,7 @@ def SendVerificationCode():
 
     # Ensure that the credentials are loaded correctly
     if not EMAIL or not PASSWORD:
-        print("Missing email or password in credentials file.")
+        logger.log_error("Missing email or password in credentials file.")
         exit()
         
     """Send a verification code to the user's email."""
@@ -44,12 +45,12 @@ def SendVerificationCode():
     try:
         response = requests.post(SEND_CODE_URL, headers=HEADERS, json=payload)
         if response.status_code == 200:
-            print("Verification code sent to your email.")
+            logger.log_info("Verification code sent to your email.")
             return True
         else:
-            print(f"Failed to send verification code with status code {response.status_code}: {response.text}")
+            logger.log_error(f"Failed to send verification code with status code {response.status_code}: {response.text}")
     except Exception as e:
-        print(f"An error occurred while sending the verification code: {e}")
+        logger.log_error(f"An error occurred while sending the verification code: {e}")
     return False
 
 def LoginAndGetToken():
@@ -80,7 +81,7 @@ def LoginAndGetToken():
             data = response.json()
             access_token = data.get("accessToken")
             if access_token:
-                print("Login successful!")
+                logger.log_info("Login successful!")
                 return 
             else:
                 if data.get("loginType") == "verifyCode":
@@ -98,21 +99,21 @@ def LoginAndGetToken():
                             retry_data = retry_response.json()
                             access_token = retry_data.get("accessToken")
                             if access_token:
-                                print("Login successful after verification!")
+                                logger.log_info("Login successful after verification!")
                                 # Save the access token to the file
                                 SaveNewToken("access_token", access_token)
                                 return access_token
                             else:
-                                print("Failed to retrieve token after verification.")
+                                logger.log_error("Failed to retrieve token after verification.")
                         else:
-                            print(f"Verification failed with status code {retry_response.status_code}: {retry_response.text}")
+                            logger.log_error(f"Verification failed with status code {retry_response.status_code}: {retry_response.text}")
                 else:
-                    print("Failed to retrieve tokens for unknown reason.")
+                    logger.log_error("Failed to retrieve tokens for unknown reason.")
         else:
-            print(f"Login failed with status code {response.status_code}: {response.text}")
+            logger.log_error(f"Login failed with status code {response.status_code}: {response.text}")
 
     except Exception as e:
-        print(f"An error occurred during login: {e}")
+        logger.log_error(f"An error occurred during login: {e}")
 
     return None
 
@@ -127,7 +128,7 @@ def TestToken():
     try:
         response = requests.get(TEST_URL, headers=HEADERS)
         if response.status_code == 200:
-            print("Test completed successfully")
+            logger.log_info("Test completed successfully")
             data = response.json()
             devices = data.get("devices", [])
             if devices:
@@ -141,8 +142,8 @@ def TestToken():
                     SaveNewToken("dev_id", dev_id)
             return True
         else:
-            print(f"Failed to test the access code {response.status_code}: {response.text}")
+            logger.log_error(f"Failed to test the access code {response.status_code}: {response.text}")
     except Exception as e:
-        print(f"An error occurred while testing the verification code: {e}")
+        logger.log_error(f"An error occurred while testing the verification code: {e}")
     return False
 

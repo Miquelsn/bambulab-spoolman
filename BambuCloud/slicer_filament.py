@@ -2,6 +2,7 @@ import requests
 import os
 from tools import *
 import json
+from helper_logs import logger
 
 
 slicer_version = "1.10.0.89"
@@ -45,9 +46,9 @@ def GetSlicerFilaments():
             private_filament = private_filament["filament"]["private"]
             return private_filament
         else:
-            print(f"Failed to get slicer filament with status code {response.status_code}: {response.text}")  
+            logger.log_error(f"Failed to get slicer filament with status code {response.status_code}: {response.text}")  
     except Exception as e:
-        print(f"An error occurred while getting the slicer filament: {e}")    
+        logger.log_error(f"An error occurred while getting the slicer filament: {e}")    
     return None
 
 def ProcessSlicerFilament(filaments):
@@ -73,6 +74,6 @@ def SaveFilamentsToFile(filaments):
         with open(filename, "w", encoding="utf-8") as file:
             for filament in filaments:
                 file.write(str(filament) + "\n")
-        print(f"Bambu Studio filaments saved successfully to {filename}")
+        logger.log_info(f"Bambu Studio filaments saved successfully to {filename}")
     except Exception as e:
-        print(f"An error occurred while saving filaments: {e}")
+        logger.log_error(f"An error occurred while saving filaments: {e}")
