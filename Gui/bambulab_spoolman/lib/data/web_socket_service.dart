@@ -17,7 +17,7 @@ class WebSocketService {
 
   void _connect() {
     try {
-      _channel = WebSocketChannel.connect(Uri.parse("ws://localhost:12346"));
+      _channel = WebSocketChannel.connect(Uri.parse("ws://192.168.1.235:12346"));
       isConnected = true;
       print("✅ WebSocket connected.");
       onConnectedCallback?.call(); // 👈 notify connection

@@ -32148,7 +32148,7 @@ if(!r.a)s.vh()},
 $S:94}
 A.a0I.prototype={
 Cq(){var s,r,q,p=this
-try{p.b=A.ajR(A.a8E(A.k1("ws://localhost:12346"),null))
+try{p.b=A.ajR(A.a8E(A.k1("ws://192.168.1.235:12346"),null))
 p.a=!0
 A.dt("\u2705 WebSocket connected.")
 p.d.$0()
