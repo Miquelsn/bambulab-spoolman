@@ -22,7 +22,6 @@ Future<String?> discoverWebSocketServer({int broadcastPort = 54545}) async {
     }
     if (DateTime.now().isAfter(timeout)) break;
   }
-
   receiver.close();
   return null;
 }
@@ -40,18 +39,27 @@ class WebSocketService {
 
   
 Future<void> _connect() async {
+  print("Connecting...");
   try {
-    final discoveredUrl = await discoverWebSocketServer(); // 👈 call UDP discovery
+    // Discover WebSocket server URL
+    final discoveredUrl = await discoverWebSocketServer();
     if (discoveredUrl == null) {
-      print("❌ Could not discover server.");
+      print("❌ Could not discover WebSocket server.");
       return;
     }
+
+    // Log discovered WebSocket URL
     print("Discovered WebSocket server at: $discoveredUrl");
+
+    // Attempt to connect to the WebSocket server
     _channel = WebSocketChannel.connect(Uri.parse(discoveredUrl));
     isConnected = true;
     print("✅ Connected to $discoveredUrl");
+
+    // Call onConnected callback
     onConnectedCallback?.call();
 
+    // Listen to incoming messages
     _channel!.stream.listen(
       (message) {
         print("📩 Received message: $message");
