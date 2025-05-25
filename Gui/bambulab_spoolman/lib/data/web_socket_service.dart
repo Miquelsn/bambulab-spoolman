@@ -32,7 +32,6 @@ class WebSocketService {
   WebSocketChannel? _channel;
   final StreamController<String> _messageController = StreamController.broadcast(); // ✅ Broadcast stream
   VoidCallback? onConnectedCallback;
-  String url = "A";
 
   WebSocketService({this.onConnectedCallback}) {
     _connect();
@@ -46,7 +45,6 @@ Future<void> _connect() async {
       print("❌ Could not discover server.");
       return;
     }
-    url = discoveredUrl; // Store the discovered URL
     print("Discovered WebSocket server at: $discoveredUrl");
     _channel = WebSocketChannel.connect(Uri.parse(discoveredUrl));
     isConnected = true;
@@ -68,7 +66,6 @@ Future<void> _connect() async {
       },
     );
   } catch (e) {
-    print("Connected to $url");
     isConnected = false;
     print("⛔ Failed to connect: $e");
   }
@@ -88,11 +85,8 @@ Future<void> _connect() async {
   }
 
   void reconnect() {
-    print("Discovered WebSocket server at: $url");
-
     if (!isConnected) {
       print("🔄 Reconnecting WebSocket...");
-      print("Discovered WebSocket server at: $url");
 
       _connect();
     }

@@ -22,9 +22,8 @@ def broadcast_server_ip(port=12346, broadcast_port=54545):
     local_ip = get_local_ip()
     port = 12346
 
-    print(f"[INFO] Local IP detected: {local_ip}")
-
     message = f'WS_SERVER:{local_ip}:{port}'
+    logger.log_info(message)
     while True:
         try:
             sock.sendto(message.encode(), ('<broadcast>', broadcast_port))
