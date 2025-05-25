@@ -23,7 +23,7 @@ def broadcast_server_ip(port=12346, broadcast_port=54545):
     port = 12346
 
     message = f'WS_SERVER:{local_ip}:{port}'
-    logger.log_info(message)
+    logger.log_info(f"Autodiscover: {message}")
     while True:
         try:
             sock.sendto(message.encode(), ('<broadcast>', broadcast_port))

@@ -32202,7 +32202,7 @@ case 4:p=3
 i=o.pop()
 l=A.ak(i)
 n.a=!1
-A.cZ("\u26d4 Failed to connect: "+A.o(l))
+A.cZ("Failed to connect: "+A.o(l))
 s=6
 break
 case 3:s=2

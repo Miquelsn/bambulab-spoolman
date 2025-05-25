@@ -7,8 +7,9 @@ import 'package:udp/udp.dart';
 Future<String?> discoverWebSocketServer({int broadcastPort = 54545}) async {
   final receiver = await UDP.bind(Endpoint.any(port: Port(broadcastPort)));
   final timeout = DateTime.now().add(Duration(seconds: 5));
-
+  print("Discovering....");
   await for (final datagram in receiver.asStream(timeout: Duration(seconds: 5))) {
+    print("Here");
     final data = String.fromCharCodes(datagram!.data);
     if (data.startsWith('WS_SERVER:')) {
       final parts = data.split(':');
@@ -67,7 +68,7 @@ Future<void> _connect() async {
     );
   } catch (e) {
     isConnected = false;
-    print("⛔ Failed to connect: $e");
+    print("Failed to connect: $e");
   }
 }
 
