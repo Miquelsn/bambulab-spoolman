@@ -68,7 +68,7 @@ class PrintTask:
                 except:
                     multiplier = 1
                     logger.log_error("Error calculating multiplier")
-                logger.log_info("Using multiplier: ", multiplier)
+                logger.log_info(f"Using multiplier: {multiplier}")
             
             for filament in self.teoric_filaments:
                 filament["weight"] = multiplier * filament["weight"]

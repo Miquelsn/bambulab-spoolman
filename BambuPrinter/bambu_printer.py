@@ -85,7 +85,7 @@ class BambuPrinter:
         logger.log_info(ams["weight"])
         filament.append({ "filamentId": ams["filamentId"], "weight": ams["weight"]})
       if nonAsignedFilament > 0:
-        logger.log_error("Non asigned filament: ",nonAsignedFilament)
+        logger.log_error(f"Non asigned filament: {nonAsignedFilament}")
         filament.append({ "filamentId": self.externalFilamentID, "weight": nonAsignedFilament})
       self.print_task.teoric_filaments = filament
 
@@ -133,7 +133,7 @@ class BambuPrinter:
         self.print_task.percent_complete = self.current_percent
         self.print_task.status = "Complete"
         self.print_task.end_time = datetime.now().strftime("%H:%M:%S-%d-%m-%Y")
-        logger.log_info("Task complete", self.complete_task)
+        logger.log_info(f"Task complete {self.complete_task}")
         if self.complete_task == True:
           self.print_task.ReportAndSaveTask()
         self.complete_task = False

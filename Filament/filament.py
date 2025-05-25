@@ -130,7 +130,7 @@ def map_filaments():
     
     if len(skipped_filaments) != 0:
         logger.log_error("\033[91mError, skipped filaments are not empty\n Not all filaments are mapped\033[0m")
-        logger.log_error("List of filaments not saved: ", skipped_filaments)
+        logger.log_error(f"List of filaments not saved: {skipped_filaments}")
 
         
     save_mappings(filament_mapping)
