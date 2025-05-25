@@ -1,7 +1,12 @@
-import 'dart:ui';
+import 'dart:async';
+import 'package:flutter/foundation.dart' show kIsWeb, VoidCallback;
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:web_socket_channel/status.dart' as status;
-import 'dart:async';
+
+import 'dart:html' as html;
+
+
+// UDP only works on native/mobile (not web)
 import 'package:udp/udp.dart';
 
 Future<String?> discoverWebSocketServer({int broadcastPort = 54545}) async {
@@ -27,61 +32,70 @@ Future<String?> discoverWebSocketServer({int broadcastPort = 54545}) async {
 }
 
 
+String getBackendWebSocketUrl({int backendPort = 8000, String path = '/ws'}) {
+  final protocol = html.window.location.protocol == 'https:' ? 'wss' : 'ws';
+  final host = html.window.location.hostname;
+  return '$protocol://$host:$backendPort$path';
+}
+
+
+
 class WebSocketService {
   bool isConnected = false;
   WebSocketChannel? _channel;
-  final StreamController<String> _messageController = StreamController.broadcast(); // ✅ Broadcast stream
+  final StreamController<String> _messageController = StreamController.broadcast();
   VoidCallback? onConnectedCallback;
 
   WebSocketService({this.onConnectedCallback}) {
     _connect();
   }
 
-  
-Future<void> _connect() async {
-  print("Connecting...");
-  try {
-    // Discover WebSocket server URL
-    final discoveredUrl = await discoverWebSocketServer();
-    if (discoveredUrl == null) {
-      print("❌ Could not discover WebSocket server.");
-      return;
+  Future<void> _connect() async {
+    print("Connecting...");
+    try {
+      String url;
+
+      if (kIsWeb) {
+        // On Flutter web, build URL dynamically from browser location
+        url = getBackendWebSocketUrl();
+      } else {
+        // On native/mobile, use UDP discovery
+        final discoveredUrl = await discoverWebSocketServer();
+        if (discoveredUrl == null) {
+          print("❌ Could not discover WebSocket server.");
+          return;
+        }
+        url = discoveredUrl;
+      }
+
+      print("Connecting to $url");
+      _channel = WebSocketChannel.connect(Uri.parse(url));
+      isConnected = true;
+      print("✅ Connected to $url");
+
+      onConnectedCallback?.call();
+
+      _channel!.stream.listen(
+        (message) {
+          print("📩 Received message: $message");
+          _messageController.add(message);
+        },
+        onDone: () {
+          isConnected = false;
+          print("❌ WebSocket connection closed.");
+        },
+        onError: (error) {
+          isConnected = false;
+          print("⚠️ WebSocket error: $error");
+        },
+      );
+    } catch (e) {
+      isConnected = false;
+      print("Failed to connect: $e");
     }
-
-    // Log discovered WebSocket URL
-    print("Discovered WebSocket server at: $discoveredUrl");
-
-    // Attempt to connect to the WebSocket server
-    _channel = WebSocketChannel.connect(Uri.parse(discoveredUrl));
-    isConnected = true;
-    print("✅ Connected to $discoveredUrl");
-
-    // Call onConnected callback
-    onConnectedCallback?.call();
-
-    // Listen to incoming messages
-    _channel!.stream.listen(
-      (message) {
-        print("📩 Received message: $message");
-        _messageController.add(message);
-      },
-      onDone: () {
-        isConnected = false;
-        print("❌ WebSocket connection closed.");
-      },
-      onError: (error) {
-        isConnected = false;
-        print("⚠️ WebSocket error: $error");
-      },
-    );
-  } catch (e) {
-    isConnected = false;
-    print("Failed to connect: $e");
   }
-}
 
-
-  /// ✅ **Expose a broadcast stream for multiple listeners**
+  /// Expose broadcast stream for multiple listeners
   Stream<String> get messageStream => _messageController.stream;
 
   void sendMessage(String message) {
@@ -96,14 +110,13 @@ Future<void> _connect() async {
   void reconnect() {
     if (!isConnected) {
       print("🔄 Reconnecting WebSocket...");
-
       _connect();
     }
   }
 
   void closeConnection() {
     _channel?.sink.close(status.goingAway);
-    _messageController.close(); // ✅ Close the stream controller
+    _messageController.close();
     isConnected = false;
   }
 }
