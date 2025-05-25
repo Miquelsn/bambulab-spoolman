@@ -68,6 +68,7 @@ Future<void> _connect() async {
       },
     );
   } catch (e) {
+    print("Connected to $url");
     isConnected = false;
     print("⛔ Failed to connect: $e");
   }
@@ -87,6 +88,8 @@ Future<void> _connect() async {
   }
 
   void reconnect() {
+    print("Discovered WebSocket server at: $url");
+
     if (!isConnected) {
       print("🔄 Reconnecting WebSocket...");
       print("Discovered WebSocket server at: $url");

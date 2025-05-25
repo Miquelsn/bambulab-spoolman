@@ -5,13 +5,11 @@ from helper_logs import logger
 import socket
 
 def get_local_ip():
+    # Método robusto para obtener IP local
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     try:
-        # Se conecta a una IP externa para forzar la selección de la interfaz local correcta
         s.connect(("8.8.8.8", 80))
         return s.getsockname()[0]
-    except Exception:
-        return "127.0.0.1"
     finally:
         s.close()
 
@@ -22,6 +20,8 @@ def broadcast_server_ip(port=12346, broadcast_port=54545):
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
 
     local_ip = get_local_ip()
+    port = 12346
+
     print(f"[INFO] Local IP detected: {local_ip}")
 
     message = f'WS_SERVER:{local_ip}:{port}'
