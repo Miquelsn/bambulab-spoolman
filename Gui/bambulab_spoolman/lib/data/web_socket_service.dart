@@ -32,7 +32,7 @@ Future<String?> discoverWebSocketServer({int broadcastPort = 54545}) async {
 }
 
 
-String getBackendWebSocketUrl({int backendPort = 8000, String path = '/ws'}) {
+String getBackendWebSocketUrl({int backendPort = 12346, String path = '/ws'}) {
   final protocol = html.window.location.protocol == 'https:' ? 'wss' : 'ws';
   final host = html.window.location.hostname;
   return '$protocol://$host:$backendPort$path';

@@ -33351,7 +33351,7 @@ try{p=null
 n=window.location.protocol
 n.toString
 m=n==="https:"?"wss":"ws"
-p=m+"://"+A.m(window.location.hostname)+":8000/ws"
+p=m+"://"+A.m(window.location.hostname)+":12346/ws"
 A.da("Connecting to "+A.m(p))
 q.b=A.amk(A.aaX(A.kx(p),null))
 q.a=!0
