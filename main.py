@@ -30,42 +30,41 @@ websocket_service.start_websocket_server()
 logger.log_info("Websocket started")
 
 # Get Bambu Cloud Credentials
-if not BambuCloud.login.TestToken():
-    BambuCloud.login.LoginAndGetToken()
-    if not BambuCloud.login.TestToken():
-        logger.log_error("Failed to get token. Retrying in 5 minutes.")
-        time.sleep(300)
-        exit()
+# if not BambuCloud.login.TestToken():
+#     BambuCloud.login.LoginAndGetToken()
+#     if not BambuCloud.login.TestToken():
+#         logger.log_error("Failed to get token. Retrying in 5 minutes.")
+#         time.sleep(300)
+#         exit()
 
 # Get the IP of the printer
-MQTT.GetPrinterIP()
-
-# Get the IP of Spoolman
-Spoolman.login.ConfigureSpoolmanApi()
-
-# Save Filaments From Bambu Studio
-filaments = BambuCloud.slicer_filament.GetSlicerFilaments()
-filaments = BambuCloud.slicer_filament.ProcessSlicerFilament(filaments)
-if filaments:
-    BambuCloud.slicer_filament.SaveFilamentsToFile(filaments)
-
-# Save Filaments From Spoolman
-filaments = Spoolman.spoolman_filament.GetSpoolmanFilaments()
-filaments = Spoolman.spoolman_filament.ProcessSpoolmanFilament(filaments)
-if filaments:
-    Spoolman.spoolman_filament.SaveFilamentsToFile(filaments)
+#MQTT.GetPrinterIP()
 
 # Map filaments
-filament.map_filaments()
+# filament.map_filaments()
 
 # Start and connect to the local MQTT broker
+
 MQTT.StartMQTT()
 logger.log_info("FSM Started. Type 'exit' to exit.")
 
-
 while True:
     try:
-        time.sleep(2)
+        # Save Filaments From Bambu Studio
+        filaments = BambuCloud.slicer_filament.GetSlicerFilaments()
+        filaments = BambuCloud.slicer_filament.ProcessSlicerFilament(filaments)
+        if filaments:
+            BambuCloud.slicer_filament.SaveFilamentsToFile(filaments)
+
+        # Save Filaments From Spoolman
+        filaments = Spoolman.spoolman_filament.GetSpoolmanFilaments()
+        filaments = Spoolman.spoolman_filament.ProcessSpoolmanFilament(filaments)
+        if filaments:
+            Spoolman.spoolman_filament.SaveFilamentsToFile(filaments)
+        
+        # Check every 24 hours (gui can force the check sooner)
+        time.sleep(24 * 60 * 60)
+
     except Exception as e:
         logger.log_exception(e)
 

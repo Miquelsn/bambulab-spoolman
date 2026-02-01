@@ -20,16 +20,41 @@ def GetSpoolmanFilaments():
     credentials = ReadCredentials()
     spoolman_ip = credentials.get('DEFAULT',"spoolman_ip", fallback = None)
     spoolman_port = credentials.get('DEFAULT',"spoolman_port", fallback = None)
+    
+        # 🚫 Config missing → silently skip
+    if not spoolman_ip or not spoolman_port:
+        logger.log_info("Spoolman IP/Port not configured yet. Skipping request.")
+        return []
+
+    # 🚫 Invalid values → skip
+    if not IsValidIp(spoolman_ip):
+        logger.log_error(f"Invalid Spoolman IP: {spoolman_ip}")
+        return []
+
+    if not IsValidPort(spoolman_port):
+        logger.log_error(f"Invalid Spoolman Port: {spoolman_port}")
+        return []
+    
     url = f"http://{spoolman_ip}:{spoolman_port}/api/v1/spool"
     try:
-        response = requests.get(url)
+        response = requests.get(url, timeout=5)
+
         if response.status_code == 200:
             return response.json()
-        else:
-            logger.log_error(f"Failed to get spoolman filaments with status code {response.status_code}: {response.text}")  
-    except Exception as e:
-        logger.log_exception(e)    
-    return None
+
+        logger.log_error(
+            f"Spoolman error {response.status_code}: {response.text[:200]}"
+        )
+
+    except requests.exceptions.ConnectTimeout:
+        logger.log_error("Spoolman connection timed out.")
+    except requests.exceptions.ConnectionError:
+        logger.log_error("Could not connect to Spoolman server.")
+    except requests.exceptions.RequestException as e:
+        logger.log_exception(e)
+
+    return []
+
 
 def ProcessSpoolmanFilament(filaments):
     filaments_list = []

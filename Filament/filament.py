@@ -135,3 +135,4 @@ def map_filaments():
         
     save_mappings(filament_mapping)
     logger.log_info("Filament mapping saved!")
+    

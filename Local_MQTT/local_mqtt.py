@@ -10,14 +10,9 @@ import json
 import BambuPrinter.bambu_printer as bp
 from tools import *
 
+mqtt_client = None
+current_printer_ip = None
 
-
-def IsValidIp(ip):
-    """Validates the format of the given IP address."""
-    pattern = re.compile(r"^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$")
-    if pattern.match(ip):
-        return all(0 <= int(part) <= 255 for part in ip.split('.'))
-    return False
 
 def GetPrinterIP():
     """Checks for printer_ip in credentials or prompts the user to provide one."""
@@ -90,22 +85,52 @@ def SendStatusMessage(client):
     }
     client.publish(topic, json.dumps(message))
 
-
 def StartMQTT():
-    """Starts the local MQTT client and connects to the broker."""
+    global mqtt_client, current_printer_ip
+
     credentials = ReadCredentials()
-    dev_acces_code = credentials.get('DEFAULT','dev_acces_code', fallback= None)
-    printer_ip = credentials.get('DEFAULT','printer_ip', fallback= None)
+    printer_ip = credentials.get('DEFAULT', 'printer_ip', fallback=None)
+
+    if not printer_ip or not IsValidIp(printer_ip):
+        logger.log_warning("MQTT not started: invalid or missing printer IP")
+        return
+
+    # Already connected to this printer → nothing to do
+    if mqtt_client and current_printer_ip == printer_ip:
+        return
+
+    # If connected to a different printer → disconnect first
+    if mqtt_client:
+        logger.log_info(f"Switching MQTT connection from {current_printer_ip} to {printer_ip}")
+        mqtt_client.loop_stop()
+        mqtt_client.disconnect()
+        mqtt_client = None
+
+    logger.log_info(f"Starting MQTT connection to {printer_ip}")
+
     client = mqtt.Client()
     client.clean_session = True
+
+    dev_acces_code = credentials.get('DEFAULT', 'dev_acces_code', fallback=None)
     client.username_pw_set(USERNAME, dev_acces_code)
-    client.tls_set(cert_reqs=ssl.CERT_NONE)  # Disable certificate verification
-    client.tls_insecure_set(True)  # Allow insecure TLS connections
-    # Set callbacks
+    client.tls_set(cert_reqs=ssl.CERT_NONE)
+    client.tls_insecure_set(True)
+
     client.on_connect = OnConnect
     client.on_message = OnMessage
-    client.connect(printer_ip, PORT, 60)
-    client.loop_start()
-    logger.log_info(f"Connected to MQTT broker at {printer_ip}")
-    time.sleep(5)
-    SendStatusMessage(client)
+
+    try:
+        client.connect(printer_ip, PORT, 60)
+        client.loop_start()
+
+        mqtt_client = client
+        current_printer_ip = printer_ip
+
+        logger.log_info(f"MQTT connected to {printer_ip}")
+
+        # Ask printer to send full status after connect
+        time.sleep(2)
+        SendStatusMessage(client)
+
+    except Exception as e:
+        logger.log_error(f"MQTT connection failed: {e}")

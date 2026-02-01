@@ -54,6 +54,7 @@ class _LogTerminalViewState extends State<LogTerminalView> {
             minWidth: 400,
           ),
           child: ListView.builder(
+            reverse: true,
             itemCount: logs.length,
             itemBuilder: (context, index) {
               return Text(

@@ -35,21 +35,55 @@ class SlicerFilament:
         return f"Filament Name: {self.filament_name}, Filament Type: {self.filament_type}, Filament Vendor: {self.filament_vendor}, Filament ID: {self.filamentID}"
 
 def GetSlicerFilaments():
-    # Load credentials from the file
     credentials = ReadCredentials()
-    ACCES_TOKEN = credentials.get('DEFAULT','access_token', fallback= None)
-    HEADERS['Authorization'] = f"Bearer {ACCES_TOKEN}"
+    access_token = credentials.get('DEFAULT', 'access_token', fallback=None)
+
+    # 🚫 No token yet → skip quietly
+    if not access_token:
+        logger.log_info("No BambuCloud access token yet. Skipping slicer filament sync.")
+        return []
+
+    headers = HEADERS.copy()
+    headers['Authorization'] = f"Bearer {access_token}"
+
     try:
-        response = requests.get(URL, headers=HEADERS)
+        response = requests.get(URL, headers=headers, timeout=8)
+
+        # ✅ Success
         if response.status_code == 200:
-            private_filament = response.json()
-            private_filament = private_filament["filament"]["private"]
-            return private_filament
-        else:
-            logger.log_error(f"Failed to get slicer filament with status code {response.status_code}: {response.text}")  
-    except Exception as e:
+            data = response.json()
+
+            # Defensive JSON parsing
+            filament_section = data.get("filament", {})
+            private_filaments = filament_section.get("private", [])
+
+            if not isinstance(private_filaments, list):
+                logger.log_error("Unexpected filament format from BambuCloud.")
+                return []
+
+            return private_filaments
+
+        # 🔑 Token expired or invalid
+        if response.status_code == 401:
+            logger.log_error("BambuCloud token expired or invalid.")
+            SaveNewToken("access_token", "")  # Clear bad token
+            return []
+
+        # 🌐 Other API error
+        logger.log_error(
+            f"BambuCloud API error {response.status_code}: {response.text[:200]}"
+        )
+
+    except requests.exceptions.ConnectTimeout:
+        logger.log_error("BambuCloud request timed out.")
+    except requests.exceptions.ConnectionError:
+        logger.log_error("No internet connection to BambuCloud.")
+    except requests.exceptions.RequestException as e:
         logger.log_exception(e)
-    return None
+    except ValueError:
+        logger.log_error("Invalid JSON received from BambuCloud.")
+
+    return []
 
 def ProcessSlicerFilament(filaments):
     filaments_list = []

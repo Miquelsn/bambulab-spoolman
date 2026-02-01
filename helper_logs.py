@@ -33,6 +33,10 @@ class Logger:
         self._write_log(f"INFO: {message}")
         print(f"INFO: {message}")
 
+    def log_warning(self, message: str):
+        self._write_log(f"WARN: {message}")
+        print(f"WARN: {message}")
+        
     def log_error(self, message: str):
         self._write_log(f"ERROR: {message}")
         print(f"ERROR: {message}")

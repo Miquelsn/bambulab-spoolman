@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart' show kIsWeb, VoidCallback;
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:web_socket_channel/status.dart' as status;
 
+// ignore: deprecated_member_use
 import 'dart:html' as html;
 
 
@@ -31,14 +32,11 @@ Future<String?> discoverWebSocketServer({int broadcastPort = 54545}) async {
   return null;
 }
 
-
 String getBackendWebSocketUrl({int backendPort = 12346, String path = '/ws'}) {
   final protocol = html.window.location.protocol == 'https:' ? 'wss' : 'ws';
   final host = html.window.location.hostname;
   return '$protocol://$host:$backendPort$path';
 }
-
-
 
 class WebSocketService {
   bool isConnected = false;

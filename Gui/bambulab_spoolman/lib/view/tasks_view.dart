@@ -24,7 +24,7 @@ class _TasksViewState extends State<TasksView> {
         final tasks = dataModel.tasks;
 
         if (tasks.isEmpty) {
-          return const Center(child: CircularProgressIndicator());
+          return Center(child: Text("Any task done yet."));
         }
 
         return ListView.builder(

@@ -1,17 +1,30 @@
+import 'package:bambulab_spoolman/view/settings_view.dart';
 import 'package:flutter/material.dart';
 import 'package:bambulab_spoolman/view/live_view.dart';
 import 'package:bambulab_spoolman/view/tasks_view.dart';
 import 'package:bambulab_spoolman/data/data_model.dart';
+import 'package:bambulab_spoolman/view/filaments_map_view.dart';
 import 'package:provider/provider.dart'; 
+import 'package:bambulab_spoolman/data/filament_model.dart';
+import 'package:bambulab_spoolman/data/web_socket_service.dart';
 
 void main() {
+  final webSocketService = WebSocketService();
+
   runApp(
-    ChangeNotifierProvider(
-      create: (context) => DataModel(),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+            create: (_) => DataModel(webSocketService: webSocketService)),
+        ChangeNotifierProvider(
+            create: (_) => FilamentMappingModel(webSocketService: webSocketService)),
+      ],
       child: const MyApp(),
     ),
   );
 }
+
+
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -44,8 +57,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
   static final List<Widget> _pages = <Widget>[
     LiveView(),
+    FilamentsMapView(),
     TasksView(),
-    Placeholder(),
+    SettingsView(),
   ];
 
   @override
@@ -70,6 +84,11 @@ class _MyHomePageState extends State<MyHomePage> {
                 icon: Icon(Icons.home),
                 selectedIcon: Icon(Icons.home_filled),
                 label: Text('Live'),
+              ),
+              NavigationRailDestination(
+                icon: Icon(Icons.change_circle),
+                selectedIcon: Icon(Icons.change_circle),
+                label: Text('Filaments Map'),
               ),
               NavigationRailDestination(
                 icon: Icon(Icons.settings),
