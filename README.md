@@ -2,7 +2,7 @@
 
 ## Overview
 
-**Bambulab–Spoolman** is a Python application that integrates:
+**Bambulab–Spoolman** is a Python backend application with a Flutter frontend that integrates:
 
 - Bambu Lab Cloud  
 - The Bambu printer local MQTT server  
@@ -108,7 +108,7 @@ Manual adjustments can be made directly in the GUI.
 
 # GUI Overview
 
-The web interface (Port 2323) provides:
+The web interface created with Flutter (Port 2323) provides:
 
 - List of recent print tasks
 - Real-time terminal output
