@@ -248,7 +248,7 @@ class _SettingsViewState extends State<SettingsView> {
                 controller: spoolmanPortController,
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(
-                  labelText: 'Spoolman Port',
+                  labelText: 'Spoolman Port (Default 7912)',
                   border: OutlineInputBorder(),
                 ),
                 validator: (value) {
