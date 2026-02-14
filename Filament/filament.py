@@ -3,7 +3,6 @@ import difflib
 import re
 from helper_logs import logger
 
-
 # File paths
 BAMBU_FILE = "slicer_filaments.txt"
 SPOOLMAN_FILE = "spoolman_filaments.txt"

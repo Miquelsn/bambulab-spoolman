@@ -1,18 +1,17 @@
 import re
 import time
 import paho.mqtt.client as mqtt
-
 from helper_logs import logger
 import ssl
-PORT = 8883  # MQTT over TLS
-USERNAME = "bblp"  # Fixed username for local MQTT
 import json
 import BambuPrinter.bambu_printer as bp
 from tools import *
 
+PORT = 8883  # MQTT over TLS
+USERNAME = "bblp"  # Fixed username for local MQTT
+
 mqtt_client = None
 current_printer_ip = None
-
 
 def GetPrinterIP():
     """Checks for printer_ip in credentials or prompts the user to provide one."""

@@ -29,7 +29,6 @@ HEADERS = {
     "Content-Type": "application/json",
 }
 
-
 def SendVerificationCode():
     # Load credentials from the file
     credentials = ReadCredentials()
@@ -46,7 +45,6 @@ def SendVerificationCode():
         "email": EMAIL,
         "type": "codeLogin"
     }
-
     try:
         response = requests.post(SEND_CODE_URL, headers=HEADERS, json=payload)
         if response.status_code == 200:
@@ -97,7 +95,7 @@ def LoginAndGetToken(verification_code=None):
         logger.log_info("Login successful")
         return LOGIN_SUCCESS
 
-    # 🔐 Verification required
+    # Verification required
     if data.get("loginType") == "verifyCode":
         logger.log_info("Verification code required")
         if SendVerificationCode():

@@ -2,14 +2,52 @@ import asyncio
 import websockets
 import threading
 import json
-
 from tools import *
 from Local_MQTT.local_mqtt import *
 from BambuCloud.login import *
-
 import BambuCloud.slicer_filament
 import Spoolman.spoolman_filament
 from Filament.filament import *
+
+def get_filaments_data():
+    # Try to update the filament lists
+    filaments = BambuCloud.slicer_filament.GetSlicerFilaments()
+    filaments = BambuCloud.slicer_filament.ProcessSlicerFilament(filaments)
+    if filaments:
+        BambuCloud.slicer_filament.SaveFilamentsToFile(filaments)
+
+    # Save Filaments From Spoolman
+    filaments = Spoolman.spoolman_filament.GetSpoolmanFilaments()
+    filaments = Spoolman.spoolman_filament.ProcessSpoolmanFilament(filaments)
+    if filaments:
+        Spoolman.spoolman_filament.SaveFilamentsToFile(filaments)
+
+    bambu_filaments = parse_filaments(BAMBU_FILE)
+    spoolman_filaments = parse_filaments(SPOOLMAN_FILE)
+    mappings = load_mappings()
+
+    used_spool_ids = set(mappings.values())
+    pending_filaments = [f for f in bambu_filaments.values() if f["id"] not in mappings]
+
+    # Compute possible matches for unmapped filaments
+    possible_matches = {}
+    for bambu in pending_filaments:
+        match = find_best_match(bambu, spoolman_filaments, used_spool_ids)
+        if match:
+            possible_matches[bambu["id"]] = [spoolman_filaments[match]["id"]]
+        else:
+            # fallback: return all unused spoolman IDs
+            possible_matches[bambu["id"]] = [f["id"] for f in spoolman_filaments.values() if f["id"] not in used_spool_ids]
+
+    return {
+        "type": "filaments_data",
+        "payload": {
+            "bambuFilaments": list(bambu_filaments.values()),
+            "spoolmanFilaments": list(spoolman_filaments.values()),
+            "mappings": mappings,
+            "possibleMatches": possible_matches
+        }
+    }
 
 class WebSocketService:
     def __init__(self, host='localhost', port=12346):
@@ -39,7 +77,7 @@ class WebSocketService:
         self.connected_clients.add(websocket)
         try:
             async for message in websocket:
-                print(f"📩 Received: {message}")
+                print(f"Received: {message}")
 
                 # ---------- SIMPLE STRING COMMANDS ----------
                 if message == "get_tasks":
@@ -92,45 +130,7 @@ class WebSocketService:
                     await websocket.send(json.dumps(response))
                     continue
                 if message == "get_filaments":
-                    
-                    # Try to update the filament lists
-                    filaments = BambuCloud.slicer_filament.GetSlicerFilaments()
-                    filaments = BambuCloud.slicer_filament.ProcessSlicerFilament(filaments)
-                    if filaments:
-                        BambuCloud.slicer_filament.SaveFilamentsToFile(filaments)
-
-                    # Save Filaments From Spoolman
-                    filaments = Spoolman.spoolman_filament.GetSpoolmanFilaments()
-                    filaments = Spoolman.spoolman_filament.ProcessSpoolmanFilament(filaments)
-                    if filaments:
-                        Spoolman.spoolman_filament.SaveFilamentsToFile(filaments)
-
-                    bambu_filaments = parse_filaments(BAMBU_FILE)
-                    spoolman_filaments = parse_filaments(SPOOLMAN_FILE)
-                    mappings = load_mappings()
-
-                    used_spool_ids = set(mappings.values())
-                    pending_filaments = [f for f in bambu_filaments.values() if f["id"] not in mappings]
-
-                    # Compute possible matches for unmapped filaments
-                    possible_matches = {}
-                    for bambu in pending_filaments:
-                        match = find_best_match(bambu, spoolman_filaments, used_spool_ids)
-                        if match:
-                            possible_matches[bambu["id"]] = [spoolman_filaments[match]["id"]]
-                        else:
-                            # fallback: return all unused spoolman IDs
-                            possible_matches[bambu["id"]] = [f["id"] for f in spoolman_filaments.values() if f["id"] not in used_spool_ids]
-
-                    response = {
-                        "type": "filaments_data",
-                        "payload": {
-                            "bambuFilaments": list(bambu_filaments.values()),
-                            "spoolmanFilaments": list(spoolman_filaments.values()),
-                            "mappings": mappings,
-                            "possibleMatches": possible_matches
-                        }
-                    }
+                    response = get_filaments_data()
                     await websocket.send(json.dumps(response))
 
                 # ---------- JSON COMMANDS ----------
@@ -172,10 +172,10 @@ class WebSocketService:
                         
                         if result == LOGIN_SUCCESS:
                             if TestToken():
-                                print("✅ BambuCloud login successful")
+                                print("BambuCloud login successful")
                                 StartMQTT()
                             else:
-                                print("❌ BambuCloud login failed after obtaining token")
+                                print("BambuCloud login failed after obtaining token")
                                 result = LOGIN_BAD_CREDENTIALS
                     
                         response = {
@@ -184,9 +184,48 @@ class WebSocketService:
                         }
 
                         await websocket.send(json.dumps(response))
+                    
+                    elif data.get("type") == "update_mapping":
+                        payload = data.get("payload", {})
+                        bambu_id = payload.get("bambu_id")
+                        spoolman_id = payload.get("spoolman_id")
+
+                        if bambu_id:
+                            mappings = load_mappings()
+                            
+                            # If spoolman_id is provided, we map.
+                            if spoolman_id:
+                                # Check if the spoolman_id is already used by another bambu_id
+                                old_bambu_id = None
+                                for key, value in mappings.items():
+                                    if value == spoolman_id:
+                                        old_bambu_id = key
+                                        break
+                                
+                                # If it was used, remove the old mapping (aka "steal" it)
+                                if old_bambu_id and old_bambu_id != bambu_id:
+                                    print(f"Stole spoolman_id {spoolman_id} from {old_bambu_id} for {bambu_id}")
+                                    del mappings[old_bambu_id]
+
+                                mappings[bambu_id] = spoolman_id
+                            
+                            # If spoolman_id is null, we unmap.
+                            elif bambu_id in mappings:
+                                del mappings[bambu_id]
+                            
+                            save_mappings(mappings)
+                            
+                            print(f"✔️ Filament mapping updated: {bambu_id} -> {spoolman_id}")
+
+                            # After updating, send the full updated list back to the client
+                            response = get_filaments_data()
+                            await websocket.send(json.dumps(response))
+                        else:
+                            response = {"type": "mapping_update_failed", "payload": "Missing bambu_id"}
+                            await websocket.send(json.dumps(response))
     
                 except json.JSONDecodeError:
-                    print("⚠️ Ignored non-JSON message")
+                    print("Received non-JSON message: ", message)
 
         except websockets.exceptions.ConnectionClosed as e:
             print(f"Connection closed: {e}")

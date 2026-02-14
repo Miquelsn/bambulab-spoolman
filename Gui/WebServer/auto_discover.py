@@ -13,8 +13,6 @@ def get_local_ip():
     finally:
         s.close()
 
-
-
 def broadcast_server_ip(port=12346, broadcast_port=54545):
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
@@ -30,8 +28,6 @@ def broadcast_server_ip(port=12346, broadcast_port=54545):
         except Exception as e:
             print(f"Broadcast error: {e}")
         time.sleep(5)
-
-
 
 # Start broadcasting in another thread
 def start_broadcast_thread():

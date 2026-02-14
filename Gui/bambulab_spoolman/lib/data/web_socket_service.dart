@@ -2,11 +2,6 @@ import 'dart:async';
 import 'package:flutter/foundation.dart' show kIsWeb, VoidCallback;
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:web_socket_channel/status.dart' as status;
-
-// ignore: deprecated_member_use
-import 'dart:html' as html;
-
-
 // UDP only works on native/mobile (not web)
 import 'package:udp/udp.dart';
 
@@ -33,10 +28,14 @@ Future<String?> discoverWebSocketServer({int broadcastPort = 54545}) async {
 }
 
 String getBackendWebSocketUrl({int backendPort = 12346, String path = '/ws'}) {
-  final protocol = html.window.location.protocol == 'https:' ? 'wss' : 'ws';
-  final host = html.window.location.hostname;
+  final uri = Uri.base;
+
+  final protocol = uri.scheme == 'https' ? 'wss' : 'ws';
+  final host = uri.host;
+
   return '$protocol://$host:$backendPort$path';
 }
+
 
 class WebSocketService {
   bool isConnected = false;

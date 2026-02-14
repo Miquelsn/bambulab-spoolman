@@ -4,10 +4,8 @@ from tools import *
 import json
 from helper_logs import logger
 
-
 slicer_version = "1.10.0.89"
 URL = f"https://api.bambulab.com/v1/iot-service/api/slicer/setting?version={slicer_version}"
-
 
 HEADERS = {
     "User-Agent": "bambu_network_agent/01.09.05.01",
@@ -38,7 +36,7 @@ def GetSlicerFilaments():
     credentials = ReadCredentials()
     access_token = credentials.get('DEFAULT', 'access_token', fallback=None)
 
-    # 🚫 No token yet → skip quietly
+    # No token yet, skip quietly
     if not access_token:
         logger.log_info("No BambuCloud access token yet. Skipping slicer filament sync.")
         return []
@@ -49,7 +47,7 @@ def GetSlicerFilaments():
     try:
         response = requests.get(URL, headers=headers, timeout=8)
 
-        # ✅ Success
+        # Success
         if response.status_code == 200:
             data = response.json()
 
@@ -63,13 +61,13 @@ def GetSlicerFilaments():
 
             return private_filaments
 
-        # 🔑 Token expired or invalid
+        # Token expired or invalid
         if response.status_code == 401:
             logger.log_error("BambuCloud token expired or invalid.")
             SaveNewToken("access_token", "")  # Clear bad token
             return []
 
-        # 🌐 Other API error
+        # Other API error
         logger.log_error(
             f"BambuCloud API error {response.status_code}: {response.text[:200]}"
         )

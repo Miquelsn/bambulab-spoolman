@@ -3,7 +3,6 @@ import os
 import Spoolman.spoolman_filament as spoolman_filament
 from helper_logs import logger
 
-
 class PrintTask:
   def __init__(self):
       self.model_name = None

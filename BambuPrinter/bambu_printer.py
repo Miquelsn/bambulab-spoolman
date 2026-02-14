@@ -7,14 +7,12 @@ import time
 from datetime import datetime
 from helper_logs import logger
 
-
 class State (Enum):
   IDLE = 0
   PREPARING  = 1
   PRINTING = 2
   FAILED = 3
   UNKWON = 4
-
 
 class BambuPrinter:
   
@@ -57,7 +55,6 @@ class BambuPrinter:
     if "tray_info_idx" in msg:
       self.externalFilamentID = msg["tray_info_idx"]
     pass
-
 
   def SetWeightDetail(self, task_id):
     self.print_task.task_id = task_id
@@ -104,7 +101,6 @@ class BambuPrinter:
       logger.log_error(f"Undefined state id: {id}")
     self.ComprobateState()
     
-    
   def SetGcodeState(self, gcode):
     logger.log_info(f"Gcode state {gcode}")
     if gcode == "FAILED":
@@ -115,9 +111,7 @@ class BambuPrinter:
       self.new_state = State.IDLE
     self.ComprobateState()
       
-      
   def ComprobateState(self):
-
     # Correct sync on first time event
     if self.first_time:
       self.first_time = False
@@ -170,6 +164,5 @@ class BambuPrinter:
         
       logger.log_info(f"State change from {self.current_state.name} to {self.new_state.name}")
       self.current_state = self.new_state
-
 
 bambu_printer = BambuPrinter()

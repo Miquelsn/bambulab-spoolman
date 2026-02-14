@@ -4,7 +4,6 @@ from tools import *
 import json
 from helper_logs import logger
 
-
 class SpoolmanFilament:
     def __init__(self):
         self.spoolId = None
@@ -21,12 +20,12 @@ def GetSpoolmanFilaments():
     spoolman_ip = credentials.get('DEFAULT',"spoolman_ip", fallback = None)
     spoolman_port = credentials.get('DEFAULT',"spoolman_port", fallback = None)
     
-        # 🚫 Config missing → silently skip
+    # Config missing → silently skip
     if not spoolman_ip or not spoolman_port:
         logger.log_info("Spoolman IP/Port not configured yet. Skipping request.")
         return []
 
-    # 🚫 Invalid values → skip
+    # Invalid values → skip
     if not IsValidIp(spoolman_ip):
         logger.log_error(f"Invalid Spoolman IP: {spoolman_ip}")
         return []
@@ -55,7 +54,6 @@ def GetSpoolmanFilaments():
 
     return []
 
-
 def ProcessSpoolmanFilament(filaments):
     filaments_list = []
     unique_ids = set()  # To track unique filament IDs
@@ -78,8 +76,6 @@ def ProcessSpoolmanFilament(filaments):
             unique_ids.add(spoolman_filament.spoolId)  # Add ID to the set
     return filaments_list
 
-    
-    
 def SaveFilamentsToFile(filaments):
     filename = "spoolman_filaments.txt"
     try:

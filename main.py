@@ -1,24 +1,20 @@
 import os
 import sys
 import time
-
 from Gui.WebServer.auto_discover import start_broadcast_thread
 from helper_logs import logger
-
 from Filament import filament
 import BambuCloud.login
 import BambuCloud.slicer_filament
 from BambuPrinter.bambu_printer import *
 import Spoolman.spoolman_filament
 import Spoolman.login
-
 import Local_MQTT.local_mqtt as MQTT
 import BambuPrinter as BambuPrinter
-
 import Gui.WebServer.flutter_web_server as flutter_web_server
-
 import Gui.WebServer.websockets_service as websocket_service
 
+# Start GUI and websockets connection
 logger.log_info("Starting GUI")
 flutter_web_server.start_thread()
 logger.log_info("GUI started")
@@ -29,27 +25,13 @@ logger.log_info("Starting WebSockets")
 websocket_service.start_websocket_server()
 logger.log_info("Websocket started")
 
-# Get Bambu Cloud Credentials
-# if not BambuCloud.login.TestToken():
-#     BambuCloud.login.LoginAndGetToken()
-#     if not BambuCloud.login.TestToken():
-#         logger.log_error("Failed to get token. Retrying in 5 minutes.")
-#         time.sleep(300)
-#         exit()
-
-# Get the IP of the printer
-#MQTT.GetPrinterIP()
-
-# Map filaments
-# filament.map_filaments()
-
 # Start and connect to the local MQTT broker
-
 MQTT.StartMQTT()
 logger.log_info("FSM Started. Type 'exit' to exit.")
 
+# Main loop (Checks new filaments)
 while True:
-    try:
+    try: 
         # Save Filaments From Bambu Studio
         filaments = BambuCloud.slicer_filament.GetSlicerFilaments()
         filaments = BambuCloud.slicer_filament.ProcessSlicerFilament(filaments)

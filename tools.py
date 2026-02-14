@@ -27,7 +27,6 @@ def IsValidIp(host: str) -> bool:
     except OSError:
         return False
 
-
 def IsValidPort(port) -> bool:
     try:
         port = int(port)

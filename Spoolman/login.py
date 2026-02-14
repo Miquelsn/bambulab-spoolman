@@ -3,7 +3,6 @@ import requests
 from tools import *
 from helper_logs import logger
 
-
 # Test the Spoolman API endpoint
 def TestSpoolmanApi(ip, port):
     url = f"http://{ip}:{port}/api/v1/info"

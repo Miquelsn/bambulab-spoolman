@@ -1,7 +1,6 @@
 import os
 import sys
 import time
-
 from helper_logs import logger
 from Filament import filament
 import BambuCloud.login
@@ -9,11 +8,8 @@ import BambuCloud.slicer_filament
 from BambuPrinter.bambu_printer import *
 import Spoolman.spoolman_filament
 import Spoolman.login
-
 import Local_MQTT.local_mqtt as MQTT
 import BambuPrinter as BambuPrinter
-
-
 
 # Get Bambu Cloud Credentials
 if not BambuCloud.login.TestToken():

@@ -3,10 +3,7 @@ import os
 from tools import *
 from helper_logs import logger
 
-
 BASE_URL = "https://api.bambulab.com/v1"
-
-
 
 HEADERS = {
     "User-Agent": "bambu_network_agent/01.09.05.01",
@@ -22,8 +19,6 @@ HEADERS = {
     "Accept": "application/json",
     "Content-Type": "application/json",
 }
-
-
 
 def GetJobID(taskID):
     if taskID == None or taskID == "0":
