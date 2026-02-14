@@ -1,11 +1,9 @@
 import requests
 import os
 from tools import *
-
+from helper_logs import logger
 
 BASE_URL = "https://api.bambulab.com/v1"
-
-
 
 HEADERS = {
     "User-Agent": "bambu_network_agent/01.09.05.01",
@@ -22,11 +20,9 @@ HEADERS = {
     "Content-Type": "application/json",
 }
 
-
-
 def GetJobID(taskID):
     if taskID == None or taskID == "0":
-        print("Error with taks ID")
+        logger.log_error("Error with taks ID")
         return
     # Load credentials from the file
     credentials = ReadCredentials()
@@ -41,17 +37,17 @@ def GetJobID(taskID):
             if "job_id" in json_data:
               return json_data['job_id']
             else:
-              print(f"Failed to get job id with status code {response.status_code}: {response.text}")
+              logger.log_error(f"Failed to get job id with status code {response.status_code}: {response.text}")
         else:
-            print(f"Failed to get job id with status code {response.status_code}: {response.text}")  
+            logger.log_error(f"Failed to get job id with status code {response.status_code}: {response.text}")  
     except Exception as e:
-        print(f"An error occurred while getting the tasks: {e}")    
+        logger.log_exception(e)    
     return None
 
 
 def GetTaksDetail(jobID):
     if jobID == None or jobID == 0:
-        print("Error with taks ID")
+        logger.log_error("Error with taks ID")
         return
     # Load credentials from the file
     credentials = ReadCredentials()
@@ -69,10 +65,10 @@ def GetTaksDetail(jobID):
                   if hit["id"] == jobID:
                     return hit
             else:
-                print("No hits available.")
+                logger.log_error("No hits available.")
         else:
-            print(f"Failed to get tasks with status code {response.status_code}: {response.text}")  
+            logger.log_error(f"Failed to get tasks with status code {response.status_code}: {response.text}")  
         return None
     except Exception as e:
-        print(f"An error occurred while getting the tasks: {e}")
+        logger.log_exception(e)
 

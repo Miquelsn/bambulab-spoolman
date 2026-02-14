@@ -2,6 +2,7 @@ import requests
 import os
 from tools import *
 import json
+from helper_logs import logger
 
 class SpoolmanFilament:
     def __init__(self):
@@ -18,16 +19,40 @@ def GetSpoolmanFilaments():
     credentials = ReadCredentials()
     spoolman_ip = credentials.get('DEFAULT',"spoolman_ip", fallback = None)
     spoolman_port = credentials.get('DEFAULT',"spoolman_port", fallback = None)
+    
+    # Config missing → silently skip
+    if not spoolman_ip or not spoolman_port:
+        logger.log_info("Spoolman IP/Port not configured yet. Skipping request.")
+        return []
+
+    # Invalid values → skip
+    if not IsValidIp(spoolman_ip):
+        logger.log_error(f"Invalid Spoolman IP: {spoolman_ip}")
+        return []
+
+    if not IsValidPort(spoolman_port):
+        logger.log_error(f"Invalid Spoolman Port: {spoolman_port}")
+        return []
+    
     url = f"http://{spoolman_ip}:{spoolman_port}/api/v1/spool"
     try:
-        response = requests.get(url)
+        response = requests.get(url, timeout=5)
+
         if response.status_code == 200:
             return response.json()
-        else:
-            print(f"Failed to get spoolman filaments with status code {response.status_code}: {response.text}")  
-    except Exception as e:
-        print(f"An error occurred while getting the spoolman filaments: {e}")    
-    return None
+
+        logger.log_error(
+            f"Spoolman error {response.status_code}: {response.text[:200]}"
+        )
+
+    except requests.exceptions.ConnectTimeout:
+        logger.log_error("Spoolman connection timed out.")
+    except requests.exceptions.ConnectionError:
+        logger.log_error("Could not connect to Spoolman server.")
+    except requests.exceptions.RequestException as e:
+        logger.log_exception(e)
+
+    return []
 
 def ProcessSpoolmanFilament(filaments):
     filaments_list = []
@@ -51,17 +76,15 @@ def ProcessSpoolmanFilament(filaments):
             unique_ids.add(spoolman_filament.spoolId)  # Add ID to the set
     return filaments_list
 
-    
-    
 def SaveFilamentsToFile(filaments):
     filename = "spoolman_filaments.txt"
     try:
         with open(filename, "w", encoding="utf-8") as file:
             for filament in filaments:
                 file.write(str(filament) + "\n")
-        print(f"Filaments saved successfully to {filename}")
+        logger.log_info(f"Filaments saved successfully to {filename}")
     except Exception as e:
-        print(f"An error occurred while saving filaments: {e}")
+        logger.log_exception(e)
         
 def LoadFilamentMapping():
     with open("filament_mapping.json", "r") as file:
@@ -75,7 +98,7 @@ def RegisterFilament(slicer_filamentID, weight):
     spoolman_filamentID = GetSpoolmanID(filament_mapping, slicer_filamentID)
     
     if spoolman_filamentID is None:
-        print(f"No corresponding spoolman filament for {slicer_filamentID}")
+        logger.log_error(f"No corresponding spoolman filament for {slicer_filamentID}")
         return False
       
     # Load credentials from the file
@@ -90,7 +113,7 @@ def RegisterFilament(slicer_filamentID, weight):
         if response.status_code == 200:
             return True
         else:
-            print(f"Failed to get spoolman filaments with status code {response.status_code}: {response.text}")  
+            logger.log_error(f"Failed to get spoolman filaments with status code {response.status_code}: {response.text}")  
     except Exception as e:
-        print(f"An error occurred while getting the spoolman filaments: {e}")    
+        logger.log_exception(e)    
     return False

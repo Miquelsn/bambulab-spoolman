@@ -1,5 +1,6 @@
 import configparser
 import os
+import socket
 
 CONFIG_FILE = "credentials.ini"
 SECTION = "DEFAULT"
@@ -18,3 +19,17 @@ def SaveNewToken(name, token):
     config[SECTION][name] = token
     with open(CONFIG_FILE, 'w') as configfile:
         config.write(configfile)
+
+def IsValidIp(host: str) -> bool:
+    try:
+        socket.inet_aton(host)
+        return True
+    except OSError:
+        return False
+
+def IsValidPort(port) -> bool:
+    try:
+        port = int(port)
+        return 1 <= port <= 65535
+    except (TypeError, ValueError):
+        return False

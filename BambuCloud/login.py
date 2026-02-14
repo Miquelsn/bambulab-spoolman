@@ -1,12 +1,18 @@
 import requests
 import os
 from tools import *
+from helper_logs import logger
 
 # API endpoint for login and sending the verification code
 LOGIN_URL = "https://api.bambulab.com/v1/user-service/user/login"
 SEND_CODE_URL = "https://api.bambulab.com/v1/user-service/user/sendemail/code"
 TEST_URL = "https://api.bambulab.com/v1/iot-service/api/user/bind"
 
+LOGIN_SUCCESS = "success"
+LOGIN_BAD_CREDENTIALS = "bad_credentials"
+LOGIN_NEEDS_CODE = "needs_verification_code"
+LOGIN_NETWORK_ERROR = "network_error"
+LOGIN_UNKNOWN_ERROR = "unknown_error"
 
 HEADERS = {
     "User-Agent": "bambu_network_agent/01.09.05.01",
@@ -23,7 +29,6 @@ HEADERS = {
     "Content-Type": "application/json",
 }
 
-
 def SendVerificationCode():
     # Load credentials from the file
     credentials = ReadCredentials()
@@ -32,7 +37,7 @@ def SendVerificationCode():
 
     # Ensure that the credentials are loaded correctly
     if not EMAIL or not PASSWORD:
-        print("Missing email or password in credentials file.")
+        logger.log_error("Missing email or password in credentials file.")
         exit()
         
     """Send a verification code to the user's email."""
@@ -40,81 +45,67 @@ def SendVerificationCode():
         "email": EMAIL,
         "type": "codeLogin"
     }
-
     try:
         response = requests.post(SEND_CODE_URL, headers=HEADERS, json=payload)
         if response.status_code == 200:
-            print("Verification code sent to your email.")
+            logger.log_info("Verification code sent to your email.")
             return True
         else:
-            print(f"Failed to send verification code with status code {response.status_code}: {response.text}")
+            logger.log_error(f"Failed to send verification code with status code {response.status_code}: {response.text}")
     except Exception as e:
-        print(f"An error occurred while sending the verification code: {e}")
+        logger.log_exception(e)
     return False
 
-def LoginAndGetToken():
-    # Load credentials from the file
+def LoginAndGetToken(verification_code=None):
     credentials = ReadCredentials()
-    EMAIL = credentials.get('DEFAULT','email', fallback= None)
-    PASSWORD = credentials.get('DEFAULT','password', fallback= None)
+    EMAIL = credentials.get('DEFAULT', 'email', fallback=None)
+    PASSWORD = credentials.get('DEFAULT', 'password', fallback=None)
 
-    # Ensure that the credentials are loaded correctly
-    if not EMAIL:
-        # If the credentials are missing, prompt the user to enter them
-        EMAIL = input("Enter your email: ")
-        SaveNewToken("email", EMAIL)
+    if not EMAIL or not PASSWORD:
+        logger.log_error("Missing email or password.")
+        return LOGIN_BAD_CREDENTIALS
 
-    if not PASSWORD:
-        PASSWORD = input("Enter your password: ")
-        SaveNewToken("password", PASSWORD)
-        
-    """Logs in and retrieves the access token."""
-    initial_payload = {
+    payload = {
         "account": EMAIL,
         "password": PASSWORD
     }
 
+    # If we already have a verification code, use it instead
+    if verification_code:
+        payload = {
+            "account": EMAIL,
+            "code": verification_code
+        }
+
     try:
-        response = requests.post(LOGIN_URL, headers=HEADERS, json=initial_payload)
-        if response.status_code == 200:
-            data = response.json()
-            access_token = data.get("accessToken")
-            if access_token:
-                print("Login successful!")
-                return 
-            else:
-                if data.get("loginType") == "verifyCode":
-                    # Step 1: Send verification code
-                    if SendVerificationCode():
-                        # Step 2: Ask for the verification code
-                        verification_code = input("Enter the verification code sent to your email: ")
-                        # Retry login with the verification code
-                        verification_payload = {
-                            "account": EMAIL,
-                            "code": verification_code
-                        }
-                        retry_response = requests.post(LOGIN_URL, headers=HEADERS, json=verification_payload)
-                        if retry_response.status_code == 200:
-                            retry_data = retry_response.json()
-                            access_token = retry_data.get("accessToken")
-                            if access_token:
-                                print("Login successful after verification!")
-                                # Save the access token to the file
-                                SaveNewToken("access_token", access_token)
-                                return access_token
-                            else:
-                                print("Failed to retrieve token after verification.")
-                        else:
-                            print(f"Verification failed with status code {retry_response.status_code}: {retry_response.text}")
-                else:
-                    print("Failed to retrieve tokens for unknown reason.")
+        response = requests.post(LOGIN_URL, headers=HEADERS, json=payload, timeout=15)
+    except requests.exceptions.RequestException as e:
+        logger.log_exception(e)
+        return LOGIN_NETWORK_ERROR
+
+    if response.status_code != 200:
+        logger.log_error(f"Login failed: {response.status_code} {response.text}")
+        return LOGIN_BAD_CREDENTIALS
+
+    data = response.json()
+    access_token = data.get("accessToken")
+
+    if access_token:
+        SaveNewToken("access_token", access_token)
+        logger.log_info("Login successful")
+        return LOGIN_SUCCESS
+
+    # Verification required
+    if data.get("loginType") == "verifyCode":
+        logger.log_info("Verification code required")
+        if SendVerificationCode():
+            return LOGIN_NEEDS_CODE
         else:
-            print(f"Login failed with status code {response.status_code}: {response.text}")
+            return LOGIN_NETWORK_ERROR
 
-    except Exception as e:
-        print(f"An error occurred during login: {e}")
+    logger.log_error("Unknown login response")
+    return LOGIN_UNKNOWN_ERROR
 
-    return None
 
 def TestToken():
     # Load credentials from the file
@@ -127,7 +118,7 @@ def TestToken():
     try:
         response = requests.get(TEST_URL, headers=HEADERS)
         if response.status_code == 200:
-            print("Test completed successfully")
+            logger.log_info("Test completed successfully")
             data = response.json()
             devices = data.get("devices", [])
             if devices:
@@ -141,8 +132,8 @@ def TestToken():
                     SaveNewToken("dev_id", dev_id)
             return True
         else:
-            print(f"Failed to test the access code {response.status_code}: {response.text}")
+            logger.log_error(f"Failed to test the access code {response.status_code}: {response.text}")
     except Exception as e:
-        print(f"An error occurred while testing the verification code: {e}")
+        logger.log_exception(e)
     return False
 
