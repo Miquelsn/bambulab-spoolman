@@ -1,0 +1,30 @@
+services:
+  bambulab-spoolman:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: bambulab-spoolman:latest
+    container_name: bambulab-spoolman
+
+    ports:
+      - "2323:2323"       # Flutter web UI
+      - "12346:12346"     # WebSocket API
+      - "54545:54545/udp" # UDP autodiscovery (native Flutter clients)
+      # NOTE: In default bridged Docker networking the UDP broadcast stays
+      # inside the Docker bridge and does not reach the host LAN.
+      # Web-browser clients are unaffected (they derive the WS URL from
+      # window.location). For native clients on the LAN use
+      # `network_mode: host` (Linux only) or configure the server IP manually.
+
+    # Runtime data files are bind-mounted from the host working directory.
+    # ALL SIX FILES MUST EXIST ON THE HOST before running `docker compose up`.
+    # Run setup.sh (Linux/macOS) or setup.ps1 (Windows) to create them.
+    volumes:
+      - ./credentials.ini:/app/credentials.ini
+      - ./task.txt:/app/task.txt
+      - ./filament_mapping.json:/app/filament_mapping.json
+      - ./slicer_filaments.txt:/app/slicer_filaments.txt
+      - ./spoolman_filaments.txt:/app/spoolman_filaments.txt
+      - ./app.log:/app/app.log
+
+    restart: unless-stopped
