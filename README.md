@@ -64,6 +64,42 @@ Launch the GUI
 
 Open the web interface at: http://{ip}:2323
 
+## Running with Docker
+
+Docker is the recommended approach for headless or always-on deployments.
+
+**Requirements:** [Docker](https://docs.docker.com/get-docker/) with Compose v2.
+
+**1. Create required data files** (only needed once):
+
+On Linux/macOS:
+```bash
+bash setup.sh
+```
+
+On Windows:
+```powershell
+.\setup.ps1
+```
+
+**2. Build and start the container:**
+
+```bash
+docker compose up -d
+```
+
+**3. Open the web interface:**
+
+Navigate to `http://<host-ip>:2323` in a browser.
+
+**4. Stop the container:**
+
+```bash
+docker compose down
+```
+
+> Data files (`credentials.ini`, `task.txt`, `filament_mapping.json`, etc.) are stored in the project directory on the host and persist across container restarts and rebuilds.
+
 ## First-Time Setup
 
 On first launch:
@@ -118,9 +154,9 @@ The web interface created with Flutter (Port 2323) provides:
 
 # Running Continuously
 
-main.py must remain running continuously.
+When running via Docker (`docker compose up -d`), the `restart: unless-stopped` policy ensures the application restarts automatically after a reboot or crash.
 
-For Linux or Raspberry Pi setups, it is recommended to configure it as a system service for automatic startup.
+For bare-metal setups (without Docker), `main.py` must remain running continuously. On Linux or Raspberry Pi it is recommended to configure it as a systemd service for automatic startup.
 
 # Future Work
 

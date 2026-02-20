@@ -1,0 +1,39 @@
+# Version control
+.git
+
+# Python bytecode
+__pycache__
+*.pyc
+*.pyo
+
+# IDE and editor files
+.vscode
+*.code-workspace
+.idea
+
+# Flutter source tree — only the pre-built web output is needed at runtime.
+# Listing each item explicitly avoids Docker's parent-exclusion/negation quirks.
+Gui/bambulab_spoolman/lib
+Gui/bambulab_spoolman/web
+Gui/bambulab_spoolman/pubspec.yaml
+Gui/bambulab_spoolman/pubspec.lock
+Gui/bambulab_spoolman/analysis_options.yaml
+Gui/bambulab_spoolman/devtools_options.yaml
+Gui/bambulab_spoolman/.metadata
+Gui/bambulab_spoolman/.gitignore
+Gui/bambulab_spoolman/README.md
+Gui/bambulab_spoolman/.dart_tool
+Gui/bambulab_spoolman/.pub-cache
+
+# Runtime data files — bind-mounted from host at runtime, must not be in image.
+credentials.ini
+task.txt
+filament_mapping.json
+slicer_filaments.txt
+spoolman_filaments.txt
+app.log
+
+# Docs and misc
+README.md
+CLAUDE.md
+LICENSE
