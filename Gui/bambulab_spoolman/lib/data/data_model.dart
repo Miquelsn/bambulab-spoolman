@@ -27,6 +27,7 @@ class DataModel extends ChangeNotifier {
   bool isLoggingIn = false;
   String verificationCode = "";
   bool showVerificationField = false;
+  String _pendingTfaKey = "";
 
   DataModel({required this.webSocketService}) {
     _initWebSocket();
@@ -145,6 +146,9 @@ class DataModel extends ChangeNotifier {
             bambuLoginStatus = payload.toString();
             isLoggingIn = false;
             showVerificationField = bambuLoginStatus == "needs_verification_code";
+            if (bambuLoginStatus == "needs_tfa") {
+              _pendingTfaKey = decoded['tfa_key'] ?? '';
+            }
             break;
         }
       }
@@ -167,6 +171,22 @@ class DataModel extends ChangeNotifier {
         "email": email,
         "password": password,
         "code": verificationCode,
+      }
+    }));
+  }
+
+  /// Send TFA code (authenticator app) for BambuCloud login
+  void sendTfaCode(String code) {
+    isLoggingIn = true;
+    notifyListeners();
+
+    sendWebSocketMessage(jsonEncode({
+      "type": "bambu_login",
+      "payload": {
+        "email": email,
+        "password": password,
+        "tfa_code": code,
+        "tfa_key": _pendingTfaKey,
       }
     }));
   }

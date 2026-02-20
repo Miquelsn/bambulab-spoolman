@@ -3,14 +3,19 @@ import os
 from tools import *
 from helper_logs import logger
 
-# API endpoint for login and sending the verification code
+# API endpoints
 LOGIN_URL = "https://api.bambulab.com/v1/user-service/user/login"
+TFA_URL   = "https://bambulab.com/api/sign-in/tfa"
 SEND_CODE_URL = "https://api.bambulab.com/v1/user-service/user/sendemail/code"
 TEST_URL = "https://api.bambulab.com/v1/iot-service/api/user/bind"
+
+# Consent body required by the TFA endpoint (mirrors what the Bambu web client sends)
+_CONSENT_BODY = '{"version":1,"scene":"login","formList":[{"formId":"TOU","op":"Opt-in"},{"formId":"PrivacyPolicy","op":"Opt-in"}]}'
 
 LOGIN_SUCCESS = "success"
 LOGIN_BAD_CREDENTIALS = "bad_credentials"
 LOGIN_NEEDS_CODE = "needs_verification_code"
+LOGIN_NEEDS_TFA = "needs_tfa"
 LOGIN_NETWORK_ERROR = "network_error"
 LOGIN_UNKNOWN_ERROR = "unknown_error"
 
@@ -29,18 +34,29 @@ HEADERS = {
     "Content-Type": "application/json",
 }
 
-def SendVerificationCode():
-    # Load credentials from the file
-    credentials = ReadCredentials()
-    EMAIL = credentials.get('DEFAULT','email', fallback= None)
-    PASSWORD = credentials.get('DEFAULT','password', fallback= None)
+# Headers that mirror the Bambu web client for the TFA endpoint (bambulab.com).
+TFA_HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0",
+    "Accept": "*/*",
+    "Accept-Language": "en-US,en;q=0.9",
+    "Content-Type": "application/json",
+    "X-BBL-Webview-Kind": "native",
+    "Referer": "https://bambulab.com/en",
+    "Origin": "https://bambulab.com",
+    "Sec-Fetch-Dest": "empty",
+    "Sec-Fetch-Mode": "cors",
+    "Sec-Fetch-Site": "same-origin",
+}
 
-    # Ensure that the credentials are loaded correctly
-    if not EMAIL or not PASSWORD:
-        logger.log_error("Missing email or password in credentials file.")
-        exit()
-        
-    """Send a verification code to the user's email."""
+def SendVerificationCode():
+    """Request an email verification code (new-device / suspicious-login flow)."""
+    credentials = ReadCredentials()
+    EMAIL = credentials.get('DEFAULT', 'email', fallback=None)
+
+    if not EMAIL:
+        logger.log_error("Missing email in credentials file.")
+        return False
+
     payload = {
         "email": EMAIL,
         "type": "codeLogin"
@@ -51,12 +67,14 @@ def SendVerificationCode():
             logger.log_info("Verification code sent to your email.")
             return True
         else:
-            logger.log_error(f"Failed to send verification code with status code {response.status_code}: {response.text}")
+            logger.log_error(f"Failed to send verification code: {response.status_code} {response.text}")
     except Exception as e:
         logger.log_exception(e)
     return False
 
-def LoginAndGetToken(verification_code=None):
+
+
+def LoginAndGetToken(verification_code=None, tfa_key=None):
     credentials = ReadCredentials()
     EMAIL = credentials.get('DEFAULT', 'email', fallback=None)
     PASSWORD = credentials.get('DEFAULT', 'password', fallback=None)
@@ -70,7 +88,7 @@ def LoginAndGetToken(verification_code=None):
         "password": PASSWORD
     }
 
-    # If we already have a verification code, use it instead
+    # Email verification code flow
     if verification_code:
         payload = {
             "account": EMAIL,
@@ -95,7 +113,7 @@ def LoginAndGetToken(verification_code=None):
         logger.log_info("Login successful")
         return LOGIN_SUCCESS
 
-    # Verification required
+    # Email verification code required
     if data.get("loginType") == "verifyCode":
         logger.log_info("Verification code required")
         if SendVerificationCode():
@@ -103,8 +121,71 @@ def LoginAndGetToken(verification_code=None):
         else:
             return LOGIN_NETWORK_ERROR
 
-    logger.log_error("Unknown login response")
+    # Two-factor authentication (TOTP authenticator app) required
+    if data.get("loginType") == "tfa":
+        tfa_key = data.get("tfaKey", "")
+        logger.log_info("TFA authentication required")
+        # Return tuple so caller can forward the tfaKey to the frontend
+        return LOGIN_NEEDS_TFA, tfa_key
+
+    logger.log_error(f"Unknown login response: {data}")
     return LOGIN_UNKNOWN_ERROR
+
+
+def SubmitTfaCode(tfa_key, tfa_code):
+    """Submit a TOTP code to complete TFA login.
+
+    Tries the OrcaSlicer API endpoint first (api.bambulab.com) with the
+    correct 'tfaCode' field name.  Falls back to the Bambu web endpoint
+    (bambulab.com/api/sign-in/tfa) if the API endpoint rejects the request.
+    """
+    credentials = ReadCredentials()
+    EMAIL = credentials.get('DEFAULT', 'email', fallback=None)
+    if not EMAIL:
+        logger.log_error("Missing email in credentials file.")
+        return LOGIN_BAD_CREDENTIALS
+
+    # --- Attempt 1: API endpoint (no Cloudflare cookies needed) ---
+    api_payload = {
+        "account": EMAIL,
+        "tfaCode": tfa_code,
+        "tfaKey": tfa_key,
+    }
+    try:
+        response = requests.post(LOGIN_URL, headers=HEADERS, json=api_payload, timeout=15)
+        logger.log_info(f"TFA API response: {response.status_code}")
+        if response.status_code == 200:
+            data = response.json()
+            access_token = data.get("accessToken")
+            if access_token:
+                SaveNewToken("access_token", access_token)
+                logger.log_info("TFA login successful via API endpoint")
+                return LOGIN_SUCCESS
+    except requests.exceptions.RequestException as e:
+        logger.log_exception(e)
+
+    # --- Attempt 2: Web endpoint (mirrors what the Bambu web client sends) ---
+    web_payload = {
+        "tfaKey": tfa_key,
+        "tfaCode": tfa_code,
+        "consentBody": _CONSENT_BODY,
+    }
+    try:
+        response = requests.post(TFA_URL, headers=TFA_HEADERS, json=web_payload, timeout=15)
+        logger.log_info(f"TFA web response: {response.status_code}")
+        if response.status_code == 200:
+            # Token is returned via Set-Cookie, not in the JSON body
+            access_token = response.cookies.get("token")
+            if access_token:
+                SaveNewToken("access_token", access_token)
+                logger.log_info("TFA login successful via web endpoint")
+                return LOGIN_SUCCESS
+            logger.log_error(f"TFA web 200 but no token cookie found. Body: {response.text}")
+    except requests.exceptions.RequestException as e:
+        logger.log_exception(e)
+
+    logger.log_error("TFA login failed on both API and web endpoints")
+    return LOGIN_BAD_CREDENTIALS
 
 
 def TestToken():

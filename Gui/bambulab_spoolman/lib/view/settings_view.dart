@@ -86,6 +86,49 @@ class _SettingsViewState extends State<SettingsView> {
     );
   }
 
+  void _showTfaDialog(BuildContext context, DataModel model) {
+    final codeController = TextEditingController();
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => AlertDialog(
+        title: const Text("Two-Factor Authentication"),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text("Enter the 6-digit code from your authenticator app."),
+            const SizedBox(height: 12),
+            TextField(
+              controller: codeController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: "Authenticator Code",
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Cancel"),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              final code = codeController.text.trim();
+              if (code.isNotEmpty) {
+                Navigator.pop(context);
+                model.sendTfaCode(code);
+              }
+            },
+            child: const Text("Verify"),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _showVerificationDialog(BuildContext context, DataModel model) {
     final codeController = TextEditingController();
 
@@ -151,6 +194,10 @@ class _SettingsViewState extends State<SettingsView> {
 
       case "needs_verification_code":
         _showVerificationDialog(context, model);
+        return;
+
+      case "needs_tfa":
+        _showTfaDialog(context, model);
         return;
 
       default:

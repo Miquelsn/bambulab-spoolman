@@ -77,7 +77,19 @@ class WebSocketService:
         self.connected_clients.add(websocket)
         try:
             async for message in websocket:
-                print(f"Received: {message}")
+                try:
+                    _parsed = json.loads(message)
+                    if isinstance(_parsed, dict) and "payload" in _parsed:
+                        _log = dict(_parsed)
+                        _log["payload"] = {
+                            k: "***" if k in ("password", "code", "tfa_code") else v
+                            for k, v in (_parsed["payload"] or {}).items()
+                        }
+                        print(f"Received: {json.dumps(_log)}")
+                    else:
+                        print(f"Received: {message}")
+                except (json.JSONDecodeError, AttributeError):
+                    print(f"Received: {message}")
 
                 # ---------- SIMPLE STRING COMMANDS ----------
                 if message == "get_tasks":
@@ -163,13 +175,23 @@ class WebSocketService:
                         payload = data.get("payload", {})
                         email = payload.get("email", "")
                         password = payload.get("password", "")
-                        code = payload.get("code")  # only present when user enters verification code
+                        code = payload.get("code")          # email verification code
+                        tfa_code = payload.get("tfa_code")  # TOTP authenticator code
+                        tfa_key = payload.get("tfa_key")    # key echoed back from needs_tfa response
 
                         SaveNewToken("email", email)
                         SaveNewToken("password", password)
 
-                        result = LoginAndGetToken(verification_code=code)
-                        
+                        if tfa_code and tfa_key:
+                            result = SubmitTfaCode(tfa_key, tfa_code)
+                        else:
+                            result = LoginAndGetToken(verification_code=code)
+
+                        # LoginAndGetToken returns (status, tfa_key) for the needs_tfa case
+                        tfa_key_for_client = None
+                        if isinstance(result, tuple):
+                            result, tfa_key_for_client = result
+
                         if result == LOGIN_SUCCESS:
                             if TestToken():
                                 print("BambuCloud login successful")
@@ -177,11 +199,15 @@ class WebSocketService:
                             else:
                                 print("BambuCloud login failed after obtaining token")
                                 result = LOGIN_BAD_CREDENTIALS
-                    
+
                         response = {
                             "type": "bambucloud_login",
                             "payload": result
                         }
+                        # Forward the tfaKey to the frontend so it can echo it back
+                        # with the TOTP code — avoids any disk storage of the key.
+                        if tfa_key_for_client:
+                            response["tfa_key"] = tfa_key_for_client
 
                         await websocket.send(json.dumps(response))
                     
