@@ -1,12 +1,11 @@
 {
-    "name": "bambulab_spoolman",
-    "short_name": "bambulab_spoolman",
+    "name": "Bambu Lab · Spoolman",
+    "short_name": "Bambu Spoolman",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
-    "orientation": "portrait-primary",
+    "background_color": "#F7FAFA",
+    "theme_color": "#2EA2B9",
+    "description": "Monitor Bambu Lab print history and Spoolman filament usage.",
     "prefer_related_applications": false,
     "icons": [
         {

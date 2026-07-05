@@ -1,11 +1,11 @@
 import requests
-import os
-from tools import *
-import json
 from helper_logs import logger
+from tools import ReadCredentials
+
 
 slicer_version = "1.10.0.89"
 URL = f"https://api.bambulab.com/v1/iot-service/api/slicer/setting?version={slicer_version}"
+
 
 HEADERS = {
     "User-Agent": "bambu_network_agent/01.09.05.01",
@@ -22,84 +22,74 @@ HEADERS = {
     "Content-Type": "application/json",
 }
 
+
 class SlicerFilament:
     def __init__(self):
         self.filamentID = None
         self.filament_name = None
         self.filament_vendor = None
         self.filament_type = None
-    
+
     def __str__(self):
         return f"Filament Name: {self.filament_name}, Filament Type: {self.filament_type}, Filament Vendor: {self.filament_vendor}, Filament ID: {self.filamentID}"
 
+
 def GetSlicerFilaments():
+    # Load credentials from the file
     credentials = ReadCredentials()
-    access_token = credentials.get('DEFAULT', 'access_token', fallback=None)
-
-    # No token yet, skip quietly
+    access_token = credentials.get("DEFAULT", "access_token", fallback=None)
     if not access_token:
-        logger.log_info("No BambuCloud access token yet. Skipping slicer filament sync.")
+        logger.log_error("Cannot load slicer filaments without a Bambu Cloud token.")
         return []
-
-    headers = HEADERS.copy()
-    headers['Authorization'] = f"Bearer {access_token}"
-
+    headers = dict(HEADERS)
+    headers["Authorization"] = f"Bearer {access_token}"
     try:
-        response = requests.get(URL, headers=headers, timeout=8)
-
-        # Success
+        response = requests.get(URL, headers=headers, timeout=30)
         if response.status_code == 200:
-            data = response.json()
-
-            # Defensive JSON parsing
-            filament_section = data.get("filament", {})
-            private_filaments = filament_section.get("private", [])
-
-            if not isinstance(private_filaments, list):
-                logger.log_error("Unexpected filament format from BambuCloud.")
+            private_filament = response.json()
+            if not isinstance(private_filament, dict):
+                logger.log_error(
+                    "Bambu Cloud returned an unexpected filament response."
+                )
                 return []
-
-            return private_filaments
-
-        # Token expired or invalid
-        if response.status_code == 401:
-            logger.log_error("BambuCloud token expired or invalid.")
-            SaveNewToken("access_token", "")  # Clear bad token
-            return []
-
-        # Other API error
-        logger.log_error(
-            f"BambuCloud API error {response.status_code}: {response.text[:200]}"
-        )
-
-    except requests.exceptions.ConnectTimeout:
-        logger.log_error("BambuCloud request timed out.")
-    except requests.exceptions.ConnectionError:
-        logger.log_error("No internet connection to BambuCloud.")
-    except requests.exceptions.RequestException as e:
-        logger.log_exception(e)
-    except ValueError:
-        logger.log_error("Invalid JSON received from BambuCloud.")
-
+            filament_data = private_filament.get("filament")
+            if not isinstance(filament_data, dict):
+                return []
+            private_profiles = filament_data.get("private")
+            return private_profiles if isinstance(private_profiles, list) else []
+        else:
+            logger.log_error(
+                f"Failed to get slicer filaments (HTTP {response.status_code})."
+            )
+    except (requests.RequestException, ValueError) as error:
+        logger.log_exception(error)
     return []
+
 
 def ProcessSlicerFilament(filaments):
     filaments_list = []
     unique_ids = set()  # To track unique filament IDs
-    for filament in filaments:
+    for filament in filaments or []:
+        if not isinstance(filament, dict):
+            continue
+        filament_id = filament.get("filament_id")
+        if not filament_id:
+            continue
         slicer_filament = SlicerFilament()
-        slicer_filament.filamentID = filament["filament_id"]
-         # Extract the part of the name before '@'
-        slicer_filament.filament_name = filament["name"].split('@')[0].strip()
-        slicer_filament.filament_vendor = filament["filament_vendor"]
-        slicer_filament.filament_type = filament["filament_type"]
+        slicer_filament.filamentID = filament_id
+        # Extract the part of the name before '@'
+        slicer_filament.filament_name = (
+            str(filament.get("name") or "Unknown").split("@")[0].strip()
+        )
+        slicer_filament.filament_vendor = filament.get("filament_vendor")
+        slicer_filament.filament_type = filament.get("filament_type")
         # Ensure is unique by filamentID
         if slicer_filament.filamentID not in unique_ids:
             filaments_list.append(slicer_filament)
             unique_ids.add(slicer_filament.filamentID)  # Add ID to the set
     return filaments_list
 
-    
+
 def SaveFilamentsToFile(filaments):
     filename = "slicer_filaments.txt"
     try:

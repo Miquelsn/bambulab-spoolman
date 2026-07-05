@@ -1,52 +1,60 @@
 import os
 import sys
+import threading
 import time
+import webbrowser
+
 from Gui.WebServer.auto_discover import start_broadcast_thread
 from helper_logs import logger
-from Filament import filament
-import BambuCloud.login
-import BambuCloud.slicer_filament
-from BambuPrinter.bambu_printer import *
-import Spoolman.spoolman_filament
-import Spoolman.login
 import Local_MQTT.local_mqtt as MQTT
-import BambuPrinter as BambuPrinter
 import Gui.WebServer.flutter_web_server as flutter_web_server
 import Gui.WebServer.websockets_service as websocket_service
+from initialization import initialize
 
-# Start GUI and websockets connection
-logger.log_info("Starting GUI")
-flutter_web_server.start_thread()
-logger.log_info("GUI started")
-logger.log_info("Starting autodiscover")
-start_broadcast_thread()
-logger.log_info("Autodiscover started")
-logger.log_info("Starting WebSockets")
-websocket_service.start_websocket_server()
-logger.log_info("Websocket started")
 
-# Start and connect to the local MQTT broker
-MQTT.StartMQTT()
-logger.log_info("FSM Started. Type 'exit' to exit.")
+def _initialize_runtime():
+    try:
+        status = initialize()
+        MQTT.StartMQTT(status.get("printers", []))
+    except Exception as error:
+        logger.log_exception(error)
+        logger.log_warning(
+            "Background setup did not finish. Correct the settings in the GUI and retry."
+        )
 
-# Main loop (Checks new filaments)
-while True:
-    try: 
-        # Save Filaments From Bambu Studio
-        filaments = BambuCloud.slicer_filament.GetSlicerFilaments()
-        filaments = BambuCloud.slicer_filament.ProcessSlicerFilament(filaments)
-        if filaments:
-            BambuCloud.slicer_filament.SaveFilamentsToFile(filaments)
 
-        # Save Filaments From Spoolman
-        filaments = Spoolman.spoolman_filament.GetSpoolmanFilaments()
-        filaments = Spoolman.spoolman_filament.ProcessSpoolmanFilament(filaments)
-        if filaments:
-            Spoolman.spoolman_filament.SaveFilamentsToFile(filaments)
-        
-        # Check every 24 hours (gui can force the check sooner)
-        time.sleep(24 * 60 * 60)
+def _open_dashboard():
+    if os.environ.get("BAMBU_OPEN_BROWSER", "1").lower() in {"0", "false", "no"}:
+        return
+    webbrowser.open("http://127.0.0.1:2323")
 
-    except Exception as e:
-        logger.log_exception(e)
 
+def main():
+    try:
+        flutter_web_server.start_thread()
+        start_broadcast_thread()
+        websocket_service.start_websocket_server()
+        threading.Thread(
+            target=_initialize_runtime,
+            name="background-initialization",
+            daemon=True,
+        ).start()
+        threading.Timer(1.0, _open_dashboard).start()
+        logger.log_info(
+            "Service started. Configuration is available at http://127.0.0.1:2323."
+        )
+
+        while True:
+            time.sleep(2)
+    except KeyboardInterrupt:
+        logger.log_info("Stopping service.")
+    except Exception as error:
+        logger.log_exception(error)
+        return 1
+    finally:
+        MQTT.StopMQTT()
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

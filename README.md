@@ -1,139 +1,136 @@
-# Bambulab–Spoolman
+# Bambulab-Spoolman
 
 ## Overview
+This Python program integrates with Bambu Cloud, the Bambu printer MQTT server, and Spoolman to monitor and report on 3D printing tasks. It retrieves print task information, filament usage, and spool data to generate detailed reports.
 
-**Bambulab–Spoolman** is a Python application that integrates:
-
-- Bambu Lab Cloud  
-- The Bambu printer local MQTT server  
-- Spoolman  
-
-It monitors 3D printing tasks, retrieves filament usage data, and generates detailed usage reports linked to your spool inventory.
-
-> ⚠ This project is currently in **alpha stage**.  
-> It is functional but still under active development, with ongoing improvements in usability and stability.
+This is currently in the alpha stage. It is functional, but there is still much work to be done to improve ease of use and usability.
 
 ## Features
-
-- Retrieves print task details from Bambu Cloud
-- Obtains model weight per filament and filament names from the slicer (Bambu Studio or Orca Slicer)
-- Monitors printer status in real time via MQTT
-- Integrates with Spoolman to fetch spool data and generate usage reports
-- Saves a history of prints
-- Supports multicolor printing with AMS Lite
-- Tracks print progress to estimate filament usage  
-  - If a print is incomplete, filament usage is scaled according to completion percentage  
-  - Note: Multicolor accuracy on incomplete prints may vary due to layer imbalance and uneven color distribution
-
+- Retrieves print task details from Bambu Cloud.
+- Obtains model weight per filament and filament names from the slicer (Orca Slicer or Bambu Studio).
+- Uses the Bambu printer MQTT server to monitor print status in real-time.
+- Integrates with Spoolman to fetch filament data and generate usage reports.
+- Saves a history of prints.
+- Serves a responsive web dashboard for printer status, structured activity,
+  and editable print history.
+- Records the physical Spoolman spool used by each filament and can safely move
+  an incorrect historical usage report to another spool.
+- Supports multiple printers on the same Bambu account, including independent simultaneous print jobs.
+- Supports AMS Lite, standard AMS/external trays, and the newer multi-AMS payload used by H2-series printers.
+- Tracks print progress to report filament usage. If a print is incomplete, it reports the percentage of print as the multiplier of the filament used. (Note: For multicolor prints, accuracy may be affected due to potential layer imbalances and specific color usage variations.)
 
 ## Limitations
+- Multi-printer support is implemented for the existing A1 and H2C workflow, but other printer/firmware combinations have not all been tested.
+- Requires access to Bambu Cloud to retrieve model weight and filament usage.
+- Filaments must be mapped in the slicer.
+- Only works for prints sent from the slicer to the printer. Prints from local SD storage or local connectivity will not provide weight data, as this information is not transmitted locally via MQTT.
 
-- Tested only with a Bambu A1 + AMS Lite (other printers may work but are not guaranteed)
-- Designed for a single printer setup
-- Requires Bambu Cloud access to retrieve model weight and filament usage
-- Filaments must be properly mapped in the slicer
-- Only works for prints sent from the slicer to the printer  
-  - Prints started from SD card or local-only connections will not provide weight data (this data is not transmitted via local MQTT)
+## Installation & Usage
+### Requirements
+- Python 3.9 or newer.
+- Flutter is required only when rebuilding the web dashboard.
 
-# Installation & Usage
+### Install
 
-## Requirements
-
-- Python 3.x
-- Required Python libraries:
-  - paho-mqtt
-  - requests
-  - json
-  - difflib
-  - re
-  - configparser
-## Running the Application
-
-The setup process has been simplified.
-
-Simply run:
+From the repository root:
 
 ```bash
-python main.py
+python3 -m venv .venv
+.venv/bin/python -m pip install -r requirements.txt
+cd Gui/bambulab_spoolman
+flutter pub get
+flutter build web
+cd ../..
 ```
-The application will:
 
-Start the backend
+### Setup
+1. Run `.venv/bin/python main.py`. The service starts the dashboard first and
+   opens `http://127.0.0.1:2323` automatically. It does not request setup values
+   in the terminal.
+2. Open **Settings** in the dashboard:
+   - Connect Bambu Cloud. If email verification is required, enter the code in
+     the verification field shown in the GUI. Passwords are used only for the
+     current login and are never saved.
+   - Select **Discover** to locate bound printers by Bambu LAN announcement.
+     When broadcasts are filtered, the service falls back to an authenticated
+     scan of the saved local subnet. A manually entered IP remains available as
+     a fallback.
+   - Add or update each printer's LAN access code. Turn off **Monitor this
+     printer** to omit an inactive or unavailable printer; it will not block
+     startup or the other printers.
+   - Enter the Spoolman host and port, then select **Test and save**.
+3. Keep `main.py` running continuously. On Raspberry Pi or Linux, consider
+   configuring it as a service. The dashboard's WebSocket API listens on port
+   `12346`, and native clients can discover it over UDP port `54545`.
 
-Launch the GUI
+Use **Filaments** in the dashboard to review unmapped slicer profiles, choose a
+suggested or searched Spoolman spool, change an existing mapping, or unlink it.
 
-Open the web interface at: http://{ip}:2323
+In print history, each filament shows the physical Spoolman spool that received
+its usage. Choose **Change** to refund that usage from the old spool and apply it
+to the correct one.
 
-## First-Time Setup
+Run commands from the repository root because runtime data files are stored there. Stop the service with `Ctrl+C`; MQTT clients are disconnected cleanly.
 
-On first launch:
-<img width="1440" height="524" alt="Captura de pantalla 2026-02-15 a las 0 39 06" src="https://github.com/user-attachments/assets/2050eac7-3b73-4f8f-ae51-b38a20c51243" />
+The old single-printer `credentials.ini` format is migrated automatically. Each
+discovered printer receives its own `[printer:<serial>]` section containing its
+IP, access code, name, model, and enabled flag. Use **Monitor this printer** in
+Settings to change the enabled flag.
+
+By default, both printers use the existing slicer-filament-to-Spoolman mapping. If the same slicer profile represents different physical spools in the two printers, add a printer-specific key to `filament_mapping.json` using `<printer serial>::<filament ID>`. For example:
+
+```json
+{
+  "GFA00": 10,
+  "H2C-SERIAL::GFA00": 20
+}
+```
+
+In this example, spool 10 is the default and the H2C consumes spool 20 for the same `GFA00` slicer profile.
+
+## Architecture
+
+The service has four main boundaries:
+
+1. Bambu Cloud supplies account-bound printers, project metadata, and slicer filament profiles.
+2. One local TLS MQTT connection per printer maintains independent print state and AMS/external-tray inventory.
+3. Completed or failed tasks are stored in `data/bambulab_spoolman.sqlite3`, and
+   confirmed filament use is sent to Spoolman. Existing `task.txt` history is
+   imported automatically once.
+4. The Python HTTP and WebSocket services expose the compiled Flutter dashboard,
+   structured JSON activity events, live printer state, the Spoolman catalog,
+   and enriched print history.
+
+Runtime configuration and renewable access tokens are stored in `credentials.ini` with owner-only permissions on POSIX systems. The Bambu account password is never persisted and any legacy saved password is removed after successful authentication. Task history is stored in an owner-only SQLite database; filament mappings and cached catalogs remain in the gitignored root data files. These controls are not a substitute for an operating-system secret store, so restrict access to the service account and its backups.
+
+The HTTP and WebSocket servers listen on the LAN to support other devices. They do not implement user authentication. Local printer MQTT uses TLS but cannot verify the printer's self-signed certificate. Run this application only on a trusted network, do not forward ports `2323` or `12346` to the internet, and use host firewall rules when the dashboard should be local-only.
+
+## Development Checks
+
+From the repository root:
+
+```bash
+.venv/bin/python -m pip install -r requirements-dev.txt
+.venv/bin/python -m compileall -q . -x '(^|/)(\.git|build|\.dart_tool)(/|$)'
+.venv/bin/python -m unittest discover -s tests -v
+.venv/bin/ruff check . --exclude Gui/bambulab_spoolman/build
+cd Gui/bambulab_spoolman
+flutter analyze
+flutter test
+flutter build web
+```
+
+The development requirements are not needed at runtime.
+
+## Future Works
+- Improved file system, instead of just saving into a .txt to improve security, protection, and performance
+- Possible integration with the slicer to avoid the need for Bambu Cloud to report weight and filament
+- Authenticated or reverse-proxied dashboard access for untrusted networks
 
 
-Open the Settings tab in the GUI.
+## License
+GNU GENERAL PUBLIC LICENSE
+Version 3, 29 June 2007
 
-Enter:
-
-- Spoolman IP address
-- Spoolman port
-- Printer local IP address
-- Bambu Cloud login (email + password)
-
-<img width="1436" height="696" alt="Captura de pantalla 2026-02-15 a las 0 39 51" src="https://github.com/user-attachments/assets/d4df9d84-c888-44df-ba5c-66befaab412a" />
-
-Save the settings.
-
-Note: If required, a verification code may be sent to your email for Bambu Cloud authentication.
-<img width="407" height="678" alt="Captura de pantalla 2026-02-15 a las 0 35 58" src="https://github.com/user-attachments/assets/a0f480df-fe87-4e3f-84e9-7b2a1ae23172" />
-<img width="323" height="191" alt="Captura de pantalla 2026-02-15 a las 0 36 05" src="https://github.com/user-attachments/assets/4504fae6-4376-4049-8128-a6ed2eeb166a" />
-
-## Filament Mapping
-
-After completing the settings:
-
-Go to the Filament Map view.
-
-Map slicer filaments (Bambu Studio / Orca Slicer) to Spoolman spools.
-
-<img width="1440" height="580" alt="Captura de pantalla 2026-02-15 a las 0 37 52" src="https://github.com/user-attachments/assets/51f233d1-4f0f-4c6b-8b47-7776f225401e" />
-<img width="661" height="467" alt="Captura de pantalla 2026-02-15 a las 0 38 03" src="https://github.com/user-attachments/assets/c3bf0711-19a2-41f0-b904-8136d16b6a95" />
-
-An automated matching algorithm suggests matches based on:
-
-- Material
-- Vendor
-- Name
-
-Manual adjustments can be made directly in the GUI.
-
-# GUI Overview
-
-The web interface (Port 2323) provides:
-
-- List of recent print tasks
-- Real-time terminal output
-- Settings management
-- Filament mapping interface
-- Print history tracking
-
-# Running Continuously
-
-main.py must remain running continuously.
-
-For Linux or Raspberry Pi setups, it is recommended to configure it as a system service for automatic startup.
-
-# Future Work
-
-- Advanced GUI metrics and print analytics
-- Graph generation and visualization tools
-- Multi-printer support (filtered by ID)
-- Possible slicer integration to avoid dependency on Bambu Cloud
-- Improved error handling and stability enhancements
-
-# License
-GNU General Public License v3.0
-29 June 2007
-
-# Contributions
-Contributions are welcome.
-Feel free to submit issues and pull requests.
+## Contributions
+Feel free to submit issues and pull requests!

@@ -1,10 +1,21 @@
-import os
 import requests
-from tools import *
 from helper_logs import logger
+from tools import ReadCredentials, SaveNewToken
+
+
+def _valid_port(value):
+    try:
+        port = int(value)
+    except (TypeError, ValueError):
+        return False
+    return 1 <= port <= 65535
+
 
 # Test the Spoolman API endpoint
 def TestSpoolmanApi(ip, port):
+    if not ip or not _valid_port(port):
+        logger.log_error("Spoolman host or port is invalid.")
+        return False
     url = f"http://{ip}:{port}/api/v1/info"
     try:
         response = requests.get(url, timeout=5)  # Timeout after 5 seconds
@@ -12,38 +23,46 @@ def TestSpoolmanApi(ip, port):
             logger.log_info("Spoolman API is working correctly!")
             return True
         else:
-            logger.log_error(f"Failed to connect with status code {response.status_code}: {response.text}")
-    except requests.RequestException as e:
-        logger.log_exception(e)
+            logger.log_error(
+                f"Spoolman health check failed (HTTP {response.status_code})."
+            )
+    except requests.RequestException as error:
+        logger.log_warning(
+            f"Spoolman is unavailable at {ip}:{port}: {error}",
+            event="spoolman_unavailable",
+            subsystem="spoolman",
+        )
     return False
 
-# Prompt user for Spoolman IP and Port
+
+def SaveSpoolmanSettings(ip, port):
+    """Validate and save Spoolman settings submitted by the GUI."""
+    ip = str(ip or "").strip()
+    port = str(port or "7912").strip()
+    if not ip or not _valid_port(port):
+        return {
+            "status": "invalid",
+            "message": "Enter a host and a port between 1 and 65535.",
+        }
+    if not TestSpoolmanApi(ip, port):
+        return {
+            "status": "unavailable",
+            "message": "Spoolman could not be reached with these settings.",
+        }
+    SaveNewToken("spoolman_ip", ip)
+    SaveNewToken("spoolman_port", port)
+    logger.log_info(f"Spoolman configuration completed: IP={ip}, Port={port}")
+    return {"status": "success", "message": "Connected to Spoolman."}
+
+
 def ConfigureSpoolmanApi():
-    # See if the data is in the credentials file
+    """Check saved settings without ever prompting in the terminal."""
     credentials = ReadCredentials()
-    spoolman_ip = credentials.get('DEFAULT','spoolman_ip', fallback= None)
-    spoolman_port = credentials.get('DEFAULT','spoolman_port', fallback= None)
+    spoolman_ip = credentials.get("DEFAULT", "spoolman_ip", fallback=None)
+    spoolman_port = credentials.get("DEFAULT", "spoolman_port", fallback=None)
     if spoolman_ip and spoolman_port:
         if TestSpoolmanApi(spoolman_ip, spoolman_port):
             logger.log_info("Spoolman configuration working")
-            return
-        
-    while True:
-        logger.log_info("Configure Spoolman IP and Port")
-        spoolman_ip = input("Enter Spoolman IP: ").strip()
-        spoolman_port = input("Enter Spoolman Port (Default is 7912): ").strip()
-
-        # Validate inputs
-        if not spoolman_ip or not spoolman_port:
-            logger.log_error("Invalid input. Both IP and Port are required.")
-            continue
-
-        # Test the API connection
-        if TestSpoolmanApi(spoolman_ip, spoolman_port):
-            # Save to credentials file if successful
-            SaveNewToken("spoolman_ip", spoolman_ip)    
-            SaveNewToken("spoolman_port", spoolman_port)
-            logger.log_info(f"Spoolman configuration completed: IP={spoolman_ip}, Port={spoolman_port}")
-            break
-        else:
-            logger.log_error("Connection to Spoolman API failed. Please try again.")
+            return True
+    logger.log_warning("Configure Spoolman from the Settings page in the GUI.")
+    return False
